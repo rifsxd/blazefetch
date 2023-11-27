@@ -1,0 +1,34 @@
+<div align="center">
+	<h1>Blazefetch</h1>
+	<blockquote align="center">⚡ A lite & blazing fast system info fetch utility.</blockquote>
+	<p><br>
+		⚡ Blazefetch is a lite & blazing fast tool for fetching info about your system.
+	</p><br>
+	<p><br> Iconic</p><br>
+	<img src="/assets/iconic.png">
+	<p><br> Legacy</p><br>
+	<img src="/assets/legacy.png">
+</div>
+
+# Install
+Binaries are provided at the releases page [here](https://github.com/rifsxd/blazefetch/releases).
+
+## Manual Compile
+```sh
+git clone https://github.com/rifsxd/blazefetch
+cd blazefetch/src
+sudo make clean install
+```
+ - For legacy title instead of icons
+```sh
+git clone https://github.com/rifsxd/blazefetch
+cd blazefetch/src
+sudo make clean install_legacy
+```  
+
+# Usage
+Run `blazefetch` with `-d` or `--daemon`  flag to initialize the daemon process once then run `blazefetch` again to get the fetch info working, if you kill the balze daemon then blazefetch wont work. Also `-v` or `--version` to get version info.
+
+# License
+Blazefetch is licensed under the MIT license.  
+[Read here](LICENSE) for more info.
