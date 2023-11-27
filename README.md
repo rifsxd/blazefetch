@@ -5,9 +5,9 @@
 		⚡ Blazefetch is a lite & blazing fast tool for fetching info about your system.
 	</p><br>
 	<p><br> Iconic</p><br>
-	<img src="/assets/iconic.png">
+	<img src="/assets/iconic_preview.png">
 	<p><br> Legacy</p><br>
-	<img src="/assets/legacy.png">
+	<img src="/assets/legacy_preview.png">
 </div>
 
 # Install
