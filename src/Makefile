@@ -17,8 +17,7 @@ PREFIX ?= /usr/
 
 # Flags
 FLAG = -lX11
-
-LEGACY = "-D LEGACY"
+ICONIC = "-D ICONIC"
 
 # Binary Folder
 INSTALLPATH = ${DESTDIR}${PREFIX}/bin
@@ -33,7 +32,7 @@ install : build
 	@chmod 0755 ${INSTALLPATH}/${BIN}
 	@echo "installed"
 
-install_legacy : build_legacy
+install_iconic : build_iconic
 
 	@echo "installing binary file to ${INSTALLPATH}/${BIN}"
 	@cp build/${BIN} ${INSTALLPATH}
@@ -47,7 +46,7 @@ install_test : build_test
 	@chmod 0755 ${INSTALLPATH}/${BIN}
 	@echo "installed"
 
-install_test_legacy : build_test_legacy
+install_test_iconic: build_test_legacy
 
 	@echo "installing binary file to ${INSTALLPATH}/${BIN_TEST}"
 	@cp build/${BIN_TEST} ${INSTALLPATH}
@@ -64,17 +63,17 @@ build:
 	$(CXX) -o build/$(BIN) $(SRC) $(FLAG)
 
 # Build the project with icons
-build_legacy:
+build_build_iconic:
 	mkdir build
-	$(CXX) -o build/$(BIN) $(SRC) $(LEGACY) $(FLAG)
+	$(CXX) -o build/$(BIN) $(SRC) $(ICONIC) $(FLAG)
 
 build_test:
 	mkdir build
 	$(CXX) -o build/$(BIN_TEST) $(SRC_TEST) $(FLAG)
 
-build_test_legacy:
+build_test_build_iconic:
 	mkdir build
-	$(CXX) -o build/$(BIN_TEST) $(SRC_TEST) $(LEGACY) $(FLAG)
+	$(CXX) -o build/$(BIN_TEST) $(SRC_TEST) $(ICONIC) $(FLAG)
 
 # Run the project
 run: build

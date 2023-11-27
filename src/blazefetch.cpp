@@ -13,7 +13,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "1.0.0"
+#define VERSION "1.1.0"
 
 std::string getTitleInfo();
 std::string getUptimeInfo();
@@ -22,25 +22,12 @@ std::string getRamInfo();
 std::string getKernelInfo();
 std::string getShellInfo();
 std::string getWmInfo();
-std::string getRandomGreeting();
-std::string getRandomGreetingBunny();
 std::string getPackageInfo();
 std::string getStorageInfo();
 std::string getCpuInfo();
 std::string getGpuInfo();
 
-#ifdef LEGACY
-#define OS "OS:"
-#define PACKAGES "PACKAGES:"
-#define KERNEL "KERNEL:"
-#define UPTIME "UPTIME:"
-#define SHELL "SHELL:"
-#define CPU "CPU:"
-#define GPU "GPU:"
-#define DISK "DISK:"
-#define RAM "RAM:"
-#define WM "WM:"
-#else
+#ifdef ICONIC
 #define OS "󰍹"
 #define PACKAGES "󰏓"
 #define KERNEL "󰌽"
@@ -51,6 +38,19 @@ std::string getGpuInfo();
 #define DISK "󰋊"
 #define RAM "󰇻"
 #define WM "󰖲"
+#define MEDIA "󰲸"
+#else
+#define OS "󰍹 OS:"
+#define PACKAGES "󰏓 PACKAGES:"
+#define KERNEL "󰌽 KERNEL:"
+#define UPTIME "UPTIME:"
+#define SHELL "󱑁 SHELL:"
+#define CPU " CPU:"
+#define GPU "󰿵 GPU:"
+#define DISK "󰋊 DISK:"
+#define RAM "󰇻 RAM:"
+#define WM "󰖲 WM:"
+#define MEDIA "󰲸 MEDIA:"
 #endif
 
 std::string getTitleInfo() {
@@ -371,6 +371,26 @@ std::string getGpuInfo() {
     return "\033[96m" + std::string(GPU) + " \033[0mUnknown";
 }
 
+std::string getMediaInfo() {
+    // You may need to replace this command with the one suitable for your media player
+    FILE *mediaInfoFile = popen("playerctl metadata --format '{{artist}} - {{title}}'", "r");
+
+    if (mediaInfoFile) {
+        char buffer[256];
+        if (fgets(buffer, sizeof(buffer), mediaInfoFile) != nullptr) {
+            // Remove newline character
+            buffer[strcspn(buffer, "\n")] = 0;
+            pclose(mediaInfoFile);
+            return "\033[94m" + std::string(MEDIA) + " \033[0m" + std::string(buffer);
+        } else {
+            pclose(mediaInfoFile);
+            return "\033[94m" + std::string(MEDIA) + " \033[0mNot playing anything...";
+        }
+    }
+
+    return "\033[94m" + std::string(MEDIA) + " \033[0mUnknown";
+}
+
 void colorPallate() {
 
     std::cout << "";
@@ -422,7 +442,7 @@ void runDaemon() {
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
                              getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
                              getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
-                             getRamInfo() + "\n" + getWmInfo() + "\n\n";
+                             getRamInfo() + "\n" + getWmInfo() + "\n" + getMediaInfo() + "\n\n";
 
         std::ofstream cacheFile("/tmp/blaze_info_cache.tmp");
         cacheFile << output;
