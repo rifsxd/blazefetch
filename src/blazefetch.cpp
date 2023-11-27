@@ -424,7 +424,7 @@ void runDaemon() {
                              getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
                              getRamInfo() + "\n" + getWmInfo() + "\n\n";
 
-        std::ofstream cacheFile("/tmp/blzae_info_cache.tmp");
+        std::ofstream cacheFile("/tmp/blaze_info_cache.tmp");
         cacheFile << output;
         cacheFile.close();
 
