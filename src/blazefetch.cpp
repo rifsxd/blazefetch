@@ -30,16 +30,16 @@ std::string getCpuInfo();
 std::string getGpuInfo();
 
 #ifdef LEGACY
-#define OS "OS"
-#define PACKAGES "Packages"
-#define KERNEL "Kernel"
-#define UPTIME "Uptime"
-#define SHELL "Shell"
-#define CPU "CPU"
-#define GPU "GPU"
-#define DISK "Disk"
-#define RAM "RAM"
-#define WM "WM"
+#define OS "OS:"
+#define PACKAGES "PACKAGES:"
+#define KERNEL "KERNEL:"
+#define UPTIME "UPTIME:"
+#define SHELL "SHELL:"
+#define CPU "CPU:"
+#define GPU "GPU:"
+#define DISK "DISK:"
+#define RAM "RAM:"
+#define WM "WM:"
 #else
 #define OS "󰍹"
 #define PACKAGES "󰏓"
@@ -429,7 +429,7 @@ void runDaemon() {
         cacheFile.close();
 
         // Sleep for 30 seconds
-        sleep(30);
+        sleep(1);
     }
 }
 
@@ -440,7 +440,7 @@ void runProgram() {
     }
 
     // Fetch info from the cache in tmp
-    std::ifstream cacheFile("/tmp/blzae_info_cache.tmp");
+    std::ifstream cacheFile("/tmp/blaze_info_cache.tmp");
     std::string cachedInfo((std::istreambuf_iterator<char>(cacheFile)), std::istreambuf_iterator<char>());
 
     std::cout << "\n";
