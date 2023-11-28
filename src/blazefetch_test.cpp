@@ -49,8 +49,7 @@ std::string getGpuInfo();
 #define RAM "󰇻"
 #define WM "󰖲"
 #define MEDIA "󰲸"
-#endif
-#ifdef COMBO
+#else
 #define OS "󰍹 OS:"
 #define PACKAGES "󰏓 PACKAGES:"
 #define KERNEL "󰌽 KERNEL:"
@@ -62,7 +61,7 @@ std::string getGpuInfo();
 #define RAM "󰇻 RAM:"
 #define WM "󰖲 WM:"
 #define MEDIA "󰲸 MEDIA:"
-#else
+/* basic words
 #define OS "OS:"
 #define PACKAGES "PACKAGES:"
 #define KERNEL "KERNEL:"
@@ -74,6 +73,7 @@ std::string getGpuInfo();
 #define RAM "RAM:"
 #define WM "WM:"
 #define MEDIA "MEDIA:"
+*/
 #endif
 
 std::string getTitleInfo() {

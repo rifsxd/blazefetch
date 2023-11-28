@@ -55,21 +55,6 @@ install_test_iconic: build_test_iconic
 	@echo "installed"
 
 
-install_test_combo: build_test_combo
-
-	@echo "installing binary file to ${INSTALLPATH}/${BIN_TEST}"
-	@cp build/${BIN_TEST} ${INSTALLPATH}
-	@chmod 0755 ${INSTALLPATH}/${BIN}
-	@echo "installed"
-
-install_combo: build_combo
-
-	@echo "installing binary file to ${INSTALLPATH}/${BIN_TEST}"
-	@cp build/${BIN_TEST} ${INSTALLPATH}
-	@chmod 0755 ${INSTALLPATH}/${BIN}
-	@echo "installed"
-
-
 # Clean build files
 clean:
 	rm -rf build
@@ -80,25 +65,15 @@ build:
 	$(CXX) -o build/$(BIN) $(SRC) $(FLAG)
 
 # Build the project with icons
-build_build_iconic:
+build_iconic:
 	mkdir build
 	$(CXX) -o build/$(BIN) $(SRC) $(ICONIC) $(FLAG)
-
-# Build the project with both icons and text
-build_build_combo:
-	mkdir build
-	$(CXX) -o build/$(BIN) $(SRC) $(COMBO) $(FLAG)
-
-	# Build the project with both icons and text
-build_build_test_combo:
-	mkdir build
-	$(CXX) -o build/$(BIN) $(SRC_TEST) $(COMBO) $(FLAG)
 
 build_test:
 	mkdir build
 	$(CXX) -o build/$(BIN_TEST) $(SRC_TEST) $(FLAG)
 
-build_test_build_iconic:
+build_test_iconic:
 	mkdir build
 	$(CXX) -o build/$(BIN_TEST) $(SRC_TEST) $(ICONIC) $(FLAG)
 
