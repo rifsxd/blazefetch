@@ -27,7 +27,7 @@ sudo make clean install_legacy
 ```  
 
 # Usage
-Run `blazefetch` with `-d` or `--daemon`  flag to initialize the daemon process once then run `blazefetch` again to get the fetch info working, if you kill the balze daemon then blazefetch wont work. Also `-v` or `--version` to get version info.
+Run `blazefetch` with `-d` or `--daemon`  flag to initialize the daemon process once then run `blazefetch` again to get the fetch info working, if you kill the blaze daemon then blazefetch wont work. Also `-v` or `--version` to get version info.
 
 # License
 Blazefetch is licensed under the MIT license.  

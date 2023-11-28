@@ -18,7 +18,6 @@ PREFIX ?= /usr/
 # Flags
 FLAG = -lX11
 ICONIC = "-D ICONIC"
-COMBO = "-D COMBO"
 
 # Binary Folder
 INSTALLPATH = ${DESTDIR}${PREFIX}/bin
