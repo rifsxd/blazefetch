@@ -19,11 +19,11 @@ git clone https://github.com/rifsxd/blazefetch
 cd blazefetch/src
 sudo make clean install
 ```
- - For legacy title instead of icons
+ - For just icons as headers
 ```sh
 git clone https://github.com/rifsxd/blazefetch
 cd blazefetch/src
-sudo make clean install_legacy
+sudo make clean install_iconic
 ```  
 
 # Usage
