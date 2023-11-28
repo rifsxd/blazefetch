@@ -6,24 +6,15 @@
 #include <fstream>
 #include <csignal>
 #include <fcntl.h>
-#include <getopt.h>
-#include <vector>
 
-
-#include <sys/shm.h>
 #include <sys/utsname.h>
 #include <sys/statvfs.h>
-#include <sys/ipc.h>
-#include <sys/types.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.0.0-BETA"
-#define SHM_SIZE 4096
-#define LOCK_FILE_PATH "/tmp/blazefetch.lock"
-
+#define VERSION "1.2.0"
 
 std::string getTitleInfo();
 std::string getUptimeInfo();
@@ -61,19 +52,6 @@ std::string getGpuInfo();
 #define RAM "󰇻 RAM:"
 #define WM "󰖲 WM:"
 #define MEDIA "󰲸 MEDIA:"
-/* basic words
-#define OS "OS:"
-#define PACKAGES "PACKAGES:"
-#define KERNEL "KERNEL:"
-#define UPTIME "UPTIME:"
-#define SHELL "SHELL:"
-#define CPU "CPU:"
-#define GPU "GPU:"
-#define DISK "DISK:"
-#define RAM "RAM:"
-#define WM "WM:"
-#define MEDIA "MEDIA:"
-*/
 #endif
 
 std::string getTitleInfo() {
@@ -428,14 +406,28 @@ void colorPallate() {
 
 }
 
+bool isDaemonRunning() {
+    // Check if a file named "daemon.pid" exists
+    std::ifstream pidFile("/tmp/blaze_daemon.pid");
+    return pidFile.good();
+}
+
+void writeDaemonPid() {
+    // Write the process ID to a file named "daemon.pid"
+    std::ofstream pidFile("/tmp/blaze_daemon.pid");
+    pidFile << getpid();
+    pidFile.close();
+}
+
+void removeDaemonPid() {
+    // Remove the file containing the daemon's process ID
+    std::remove("/tmp/blaze_daemon.pid");
+}
+
 void signalHandler(int signum) {
     // Handle signals, e.g., clean up and exit
     if (signum == SIGTERM || signum == SIGINT) {
-        // Remove the lock file before exiting
-        if (unlink(LOCK_FILE_PATH) == -1) {
-            perror("unlink");
-            exit(EXIT_FAILURE);
-        }
+        removeDaemonPid();
         exit(0);
     }
 }
@@ -488,59 +480,7 @@ void daemonize() {
     open("/dev/null", O_RDWR); // stderr
 }
 
-int createSharedMemory() {
-    int shmid = shmget(IPC_PRIVATE, SHM_SIZE, IPC_CREAT | 0666);
-    if (shmid == -1) {
-        perror("shmget");
-        exit(EXIT_FAILURE);
-    }
-    return shmid;
-}
-
-char* attachSharedMemory(int shmid) {
-    char* shm = (char*)shmat(shmid, NULL, 0);
-    if (shm == (char*)-1) {
-        perror("shmat");
-        exit(EXIT_FAILURE);
-    }
-    return shm;
-}
-
-void detachSharedMemory(char* shm) {
-    if (shmdt(shm) == -1) {
-        perror("shmdt");
-        exit(EXIT_FAILURE);
-    }
-}
-
-void removeSharedMemory(int shmid) {
-    if (shmctl(shmid, IPC_RMID, NULL) == -1) {
-        perror("shmctl");
-        exit(EXIT_FAILURE);
-    }
-}
-
 void runDaemon() {
-    // Set up signal handling
-    signal(SIGTERM, signalHandler);
-    signal(SIGINT, signalHandler);
-
-    // Check if the lock file exists
-    if (access(LOCK_FILE_PATH, F_OK) != -1) {
-        std::cerr << "\nUmm... Blaze daemon is already running?!\n" << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    // Create the lock file
-    int lockFile = open(LOCK_FILE_PATH, O_CREAT | O_WRONLY, 0644);
-    if (lockFile == -1) {
-        perror("open");
-        exit(EXIT_FAILURE);
-    }
-
-    // Display the message only when creating the lock file for the first time
-    std::cout << "\nBlaze daemon is running in the background." << std::endl;
-    std::cout << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
     // Daemonize the process
     daemonize();
 
@@ -548,110 +488,40 @@ void runDaemon() {
     signal(SIGTERM, signalHandler);
     signal(SIGINT, signalHandler);
 
-    // Create a key for shared memory
-    key_t key = ftok("/tmp", 'R');
-
-    // Create (or get) a shared memory segment
-    int shmid = shmget(key, 1024, 0644 | IPC_CREAT);
-
-    // Attach the shared memory segment
-    char *shm = (char *)shmat(shmid, (void *)0, 0);
-
     // Run the daemon loop
     while (true) {
-        // Run get<example>Info functions and store the output in shared memory
+        // Run get<example>Info functions and store the output in tmp cache
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
-                            getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
-                            getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
-                            getRamInfo() + "\n" + getWmInfo() + "\n" + getMediaInfo() + "\n\n";
+                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
+                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
+                             getRamInfo() + "\n" + getWmInfo() + "\n" + getMediaInfo() + "\n\n";
 
-        // Update shared memory
-        std::strcpy(shm, output.c_str());
+        std::ofstream cacheFile("/tmp/blaze_info_cache.tmp");
+        cacheFile << output;
+        cacheFile.close();
 
-        // Sleep for 1 seconds
+        // Sleep for 30 seconds
         sleep(1);
-    }
-
-    // Detach the shared memory segment
-    shmdt(shm);
-
-    // Remove the shared memory segment (optional, depending on your requirements)
-    shmctl(shmid, IPC_RMID, NULL);
-    // Remove the lock file before exiting
-    if (unlink(LOCK_FILE_PATH) == -1) {
-        perror("unlink");
-        exit(EXIT_FAILURE);
     }
 }
 
 void runProgram() {
-    // Create a key for shared memory
-    key_t key = ftok("/tmp", 'R');
+    if (!isDaemonRunning()) {
+        std::cout << "Ah oh! Blaze daemon is not running! Please run the blaze daemon first using -d or --daemon flag." << std::endl;
+        return;
+    }
 
-    // Get the shared memory segment
-    int shmid = shmget(key, 1024, 0644);
-
-    // Attach the shared memory segment
-    char *shm = (char *)shmat(shmid, (void *)0, 0);
+    // Fetch info from the cache in tmp
+    std::ifstream cacheFile("/tmp/blaze_info_cache.tmp");
+    std::string cachedInfo((std::istreambuf_iterator<char>(cacheFile)), std::istreambuf_iterator<char>());
 
     // Display cached info
-    std::cout << "\n" << shm;
+    std::cout << "\n" << cachedInfo;
 
     colorPallate();
-
-    // Detach the shared memory segment
-    shmdt(shm);
 }
-
-void printHelp() {
-    std::cout << "\nUsage: blazefetch [OPTIONS]\n"
-              << "Options:\n"
-              << "  -g, --get INFO    Get and display specific information (e.g., OS, GPU)\n"
-              << "  -d, --daemon      Run as a daemon\n"
-              << "  -v, --version     Show version information\n"
-              << "  -h, --help        Show this help message\n";
-}
-
-void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
-    for (const auto& info : infoTypes) {
-        if (info == "OS") {
-            std::cout << getOsInfo() << std::endl;
-        } else if (info == "PACKAGES") {
-            std::cout << getPackageInfo() << std::endl;
-        } else if (info == "KERNEL") {
-            std::cout << getKernelInfo() << std::endl;
-        } else if (info == "UPTIME") {
-            std::cout << getUptimeInfo() << std::endl;
-        } else if (info == "SHELL") {
-            std::cout << getShellInfo() << std::endl;
-        } else if (info == "CPU") {
-            std::cout << getCpuInfo() << std::endl;
-        } else if (info == "GPU") {
-            std::cout << getGpuInfo() << std::endl;
-        } else if (info == "DISK") {
-            std::cout << getStorageInfo() << std::endl;
-        } else if (info == "RAM") {
-            std::cout << getRamInfo() << std::endl;
-        } else if (info == "WM") {
-            std::cout << getWmInfo() << std::endl;
-        } else if (info == "MEDIA") {
-            std::cout << getMediaInfo() << std::endl;
-        } else {
-            std::cerr << "Invalid information type: " << info << std::endl;
-        }
-    }
-}
-
-const struct option longOptions[] = {
-    {"daemon", no_argument, NULL, 'd'},
-    {"version", no_argument, NULL, 'v'},
-    {"get", required_argument, NULL, 'g'},
-    {"help", no_argument, NULL, 'h'},
-    {NULL, 0, NULL, 0} // End of the array
-};
 
 int main(int argc, char *argv[]) {
-    // Declare the missing identifiers
     int runDaemonFlag = 0;
     int showVersionFlag = 0;
 
@@ -661,39 +531,6 @@ int main(int argc, char *argv[]) {
             runDaemonFlag = 1;
         } else if (std::strcmp(argv[i], "-v") == 0 || std::strcmp(argv[i], "--version") == 0) {
             showVersionFlag = 1;
-        } else if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
-            printHelp();
-        }
-    }
-
-    // Check if the daemon is already running (excluding -v and --daemon flags)
-    if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showVersionFlag) {
-        std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    const char* getInfo = nullptr; // Variable to store the specified information to fetch
-
-    std::vector<std::string> getInfoTypes;
-
-    int opt;
-    while ((opt = getopt_long(argc, argv, "dg:vh", longOptions, NULL)) != -1) {
-        switch (opt) {
-            case 'd':
-                runDaemonFlag = 1;
-                break;
-            case 'g':
-                getInfoTypes.push_back(optarg);
-                break;
-            case 'v':
-                showVersionFlag = 1;
-                break;
-            case 'h':
-                printHelp();
-                return 0;
-            default:
-                printHelp();
-                return 1;
         }
     }
 
@@ -706,17 +543,20 @@ int main(int argc, char *argv[]) {
 
     srand(static_cast<unsigned int>(time(nullptr)));
 
-    int shmid = createSharedMemory();
-    char* shm = attachSharedMemory(shmid);
-
-    // Correct the function calls
-    detachSharedMemory(shm);
-
     if (runDaemonFlag) {
+        // Run the daemon
+        if (isDaemonRunning()) {
+            std::cout << "Umm... Blaze daemon is already running?!" << std::endl;
+            return 0;
+        }
+            // Display the message when running in daemon mode
+        std::cout << "\nBlaze daemon is running in the background." << std::endl;
+        std::cout << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
+
+        writeDaemonPid();
         runDaemon();
-    } else if (!getInfoTypes.empty()) {
-        getInfoAndPrint(getInfoTypes);
     } else {
+        // Run the program
         runProgram();
     }
 
