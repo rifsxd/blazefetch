@@ -18,6 +18,7 @@ PREFIX ?= /usr/
 # Flags
 FLAG = -lX11
 ICONIC = "-D ICONIC"
+COMBO = "-D COMBO"
 
 # Binary Folder
 INSTALLPATH = ${DESTDIR}${PREFIX}/bin
@@ -46,12 +47,28 @@ install_test : build_test
 	@chmod 0755 ${INSTALLPATH}/${BIN}
 	@echo "installed"
 
-install_test_iconic: build_test_legacy
+install_test_iconic: build_test_iconic
 
 	@echo "installing binary file to ${INSTALLPATH}/${BIN_TEST}"
 	@cp build/${BIN_TEST} ${INSTALLPATH}
 	@chmod 0755 ${INSTALLPATH}/${BIN}
 	@echo "installed"
+
+
+install_test_combo: build_test_combo
+
+	@echo "installing binary file to ${INSTALLPATH}/${BIN_TEST}"
+	@cp build/${BIN_TEST} ${INSTALLPATH}
+	@chmod 0755 ${INSTALLPATH}/${BIN}
+	@echo "installed"
+
+install_combo: build_combo
+
+	@echo "installing binary file to ${INSTALLPATH}/${BIN_TEST}"
+	@cp build/${BIN_TEST} ${INSTALLPATH}
+	@chmod 0755 ${INSTALLPATH}/${BIN}
+	@echo "installed"
+
 
 # Clean build files
 clean:
@@ -66,6 +83,16 @@ build:
 build_build_iconic:
 	mkdir build
 	$(CXX) -o build/$(BIN) $(SRC) $(ICONIC) $(FLAG)
+
+# Build the project with both icons and text
+build_build_combo:
+	mkdir build
+	$(CXX) -o build/$(BIN) $(SRC) $(COMBO) $(FLAG)
+
+	# Build the project with both icons and text
+build_build_test_combo:
+	mkdir build
+	$(CXX) -o build/$(BIN) $(SRC_TEST) $(COMBO) $(FLAG)
 
 build_test:
 	mkdir build
