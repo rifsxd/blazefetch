@@ -7,14 +7,18 @@
 #include <csignal>
 #include <fcntl.h>
 
+#include <sys/shm.h>
 #include <sys/utsname.h>
 #include <sys/statvfs.h>
+#include <sys/ipc.h>
+#include <sys/types.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "1.2.0"
+#define VERSION "2.0.0-TESTING"
+#define SHM_SIZE 4096
 
 std::string getTitleInfo();
 std::string getUptimeInfo();
@@ -406,28 +410,9 @@ void colorPallate() {
 
 }
 
-bool isDaemonRunning() {
-    // Check if a file named "daemon.pid" exists
-    std::ifstream pidFile("/tmp/blaze_daemon.pid");
-    return pidFile.good();
-}
-
-void writeDaemonPid() {
-    // Write the process ID to a file named "daemon.pid"
-    std::ofstream pidFile("/tmp/blaze_daemon.pid");
-    pidFile << getpid();
-    pidFile.close();
-}
-
-void removeDaemonPid() {
-    // Remove the file containing the daemon's process ID
-    std::remove("/tmp/blaze_daemon.pid");
-}
-
 void signalHandler(int signum) {
     // Handle signals, e.g., clean up and exit
     if (signum == SIGTERM || signum == SIGINT) {
-        removeDaemonPid();
         exit(0);
     }
 }
@@ -480,92 +465,39 @@ void daemonize() {
     open("/dev/null", O_RDWR); // stderr
 }
 
-class SystemInfo {
-public:
-    SystemInfo() {}
-
-    void updateInfo() {
-        // Update the system information here and store it in member variables
-        titleInfo_ = getTitleInfo();
-        osInfo_ = getOsInfo();
-        packageInfo_ = getPackageInfo();
-        kernelInfo_ = getKernelInfo();
-        uptimeInfo_ = getUptimeInfo();
-        shellInfo_ = getShellInfo();
-        cpuInfo_ = getCpuInfo();
-        gpuInfo_ = getGpuInfo();
-        storageInfo_ = getStorageInfo();
-        ramInfo_ = getRamInfo();
-        wmInfo_ = getWmInfo();
-        mediaInfo_ = getMediaInfo();
+int createSharedMemory() {
+    int shmid = shmget(IPC_PRIVATE, SHM_SIZE, IPC_CREAT | 0666);
+    if (shmid == -1) {
+        perror("shmget");
+        exit(EXIT_FAILURE);
     }
+    return shmid;
+}
 
-    std::string getTitleInfo() const {
-        return titleInfo_;
+char* attachSharedMemory(int shmid) {
+    char* shm = (char*)shmat(shmid, NULL, 0);
+    if (shm == (char*)-1) {
+        perror("shmat");
+        exit(EXIT_FAILURE);
     }
+    return shm;
+}
 
-    std::string getOsInfo() const {
-        return osInfo_;
+void detachSharedMemory(char* shm) {
+    if (shmdt(shm) == -1) {
+        perror("shmdt");
+        exit(EXIT_FAILURE);
     }
+}
 
-    std::string getPackageInfo() const {
-        return packageInfo_;
+void removeSharedMemory(int shmid) {
+    if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+        perror("shmctl");
+        exit(EXIT_FAILURE);
     }
-
-    std::string getKernelInfo() const {
-        return kernelInfo_;
-    }
-
-    std::string getUptimeInfo() const {
-        return uptimeInfo_;
-    }
-
-    std::string getShellInfo() const {
-        return shellInfo_;
-    }
-
-    std::string getCpuInfo() const {
-        return cpuInfo_;
-    }
-
-    std::string getGpuInfo() const {
-        return gpuInfo_;
-    }
-
-    std::string getStorageInfo() const {
-        return storageInfo_;
-    }
-
-    std::string getRamInfo() const {
-        return ramInfo_;
-    }
-
-    std::string getWmInfo() const {
-        return wmInfo_;
-    }
-
-    std::string getMediaInfo() const {
-        return mediaInfo_;
-    }
-
-private:
-    // Member variables to store system information
-    std::string titleInfo_;
-    std::string osInfo_;
-    std::string packageInfo_;
-    std::string kernelInfo_;
-    std::string uptimeInfo_;
-    std::string shellInfo_;
-    std::string cpuInfo_;
-    std::string gpuInfo_;
-    std::string storageInfo_;
-    std::string ramInfo_;
-    std::string wmInfo_;
-    std::string mediaInfo_;
-};
+}
 
 void runDaemon() {
-    SystemInfo systemInfo;
     // Daemonize the process
     daemonize();
 
@@ -573,30 +505,58 @@ void runDaemon() {
     signal(SIGTERM, signalHandler);
     signal(SIGINT, signalHandler);
 
+    // Create a key for shared memory
+    key_t key = ftok("/tmp", 'R');
+
+    // Create (or get) a shared memory segment
+    int shmid = shmget(key, 1024, 0644 | IPC_CREAT);
+
+    // Attach the shared memory segment
+    char *shm = (char *)shmat(shmid, (void *)0, 0);
+
     // Run the daemon loop
     while (true) {
-        // Update system information
-        systemInfo.updateInfo();
+        // Run get<example>Info functions and store the output in shared memory
+        std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
+                            getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
+                            getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
+                            getRamInfo() + "\n" + getWmInfo() + "\n" + getMediaInfo() + "\n\n";
+
+        // Update shared memory
+        std::strcpy(shm, output.c_str());
 
         // Sleep for 1 seconds
         sleep(1);
     }
+
+    // Detach the shared memory segment
+    shmdt(shm);
+
+    // Remove the shared memory segment (optional, depending on your requirements)
+    shmctl(shmid, IPC_RMID, NULL);
 }
 
-void runProgram(const SystemInfo& systemInfo) {
-    // Fetch info from the SystemInfo instance
-    std::cout << "\n" << systemInfo.getTitleInfo() << "\n" << systemInfo.getOsInfo() << "\n"
-              << systemInfo.getPackageInfo() << "\n" << systemInfo.getKernelInfo() << "\n"
-              << systemInfo.getUptimeInfo() << "\n" << systemInfo.getShellInfo() << "\n"
-              << systemInfo.getCpuInfo() << "\n" << systemInfo.getGpuInfo() << "\n"
-              << systemInfo.getStorageInfo() << "\n" << systemInfo.getRamInfo() << "\n"
-              << systemInfo.getWmInfo() << "\n" << systemInfo.getMediaInfo() << "\n\n";
+void runProgram() {
+    // Create a key for shared memory
+    key_t key = ftok("/tmp", 'R');
+
+    // Get the shared memory segment
+    int shmid = shmget(key, 1024, 0644);
+
+    // Attach the shared memory segment
+    char *shm = (char *)shmat(shmid, (void *)0, 0);
+
+    // Display cached info
+    std::cout << "\n" << shm;
 
     colorPallate();
+
+    // Detach the shared memory segment
+    shmdt(shm);
 }
 
 int main(int argc, char *argv[]) {
-    SystemInfo systemInfo;
+    // Declare the missing identifiers
     int runDaemonFlag = 0;
     int showVersionFlag = 0;
 
@@ -618,23 +578,20 @@ int main(int argc, char *argv[]) {
 
     srand(static_cast<unsigned int>(time(nullptr)));
 
-    
+    int shmid = createSharedMemory();
+    char* shm = attachSharedMemory(shmid);
 
+    // Correct the function calls
     if (runDaemonFlag) {
-        // Run the daemon
-        if (isDaemonRunning()) {
-            std::cout << "Umm... Blaze daemon is already running?!" << std::endl;
-            return 0;
-        }
-            // Display the message when running in daemon mode
-        std::cout << "\nBlaze daemon is running in the background." << std::endl;
-        std::cout << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
-
-        writeDaemonPid();
         runDaemon();
     } else {
-        // Run the program
-        runProgram(systemInfo);
+        runProgram();
+    }
+
+    detachSharedMemory(shm);
+
+    if (runDaemonFlag) {
+        removeSharedMemory(shmid);
     }
 
     return 0;
