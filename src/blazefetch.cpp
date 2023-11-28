@@ -480,92 +480,7 @@ void daemonize() {
     open("/dev/null", O_RDWR); // stderr
 }
 
-class SystemInfo {
-public:
-    SystemInfo() {}
-
-    void updateInfo() {
-        // Update the system information here and store it in member variables
-        titleInfo_ = getTitleInfo();
-        osInfo_ = getOsInfo();
-        packageInfo_ = getPackageInfo();
-        kernelInfo_ = getKernelInfo();
-        uptimeInfo_ = getUptimeInfo();
-        shellInfo_ = getShellInfo();
-        cpuInfo_ = getCpuInfo();
-        gpuInfo_ = getGpuInfo();
-        storageInfo_ = getStorageInfo();
-        ramInfo_ = getRamInfo();
-        wmInfo_ = getWmInfo();
-        mediaInfo_ = getMediaInfo();
-    }
-
-    std::string getTitleInfo() const {
-        return titleInfo_;
-    }
-
-    std::string getOsInfo() const {
-        return osInfo_;
-    }
-
-    std::string getPackageInfo() const {
-        return packageInfo_;
-    }
-
-    std::string getKernelInfo() const {
-        return kernelInfo_;
-    }
-
-    std::string getUptimeInfo() const {
-        return uptimeInfo_;
-    }
-
-    std::string getShellInfo() const {
-        return shellInfo_;
-    }
-
-    std::string getCpuInfo() const {
-        return cpuInfo_;
-    }
-
-    std::string getGpuInfo() const {
-        return gpuInfo_;
-    }
-
-    std::string getStorageInfo() const {
-        return storageInfo_;
-    }
-
-    std::string getRamInfo() const {
-        return ramInfo_;
-    }
-
-    std::string getWmInfo() const {
-        return wmInfo_;
-    }
-
-    std::string getMediaInfo() const {
-        return mediaInfo_;
-    }
-
-private:
-    // Member variables to store system information
-    std::string titleInfo_;
-    std::string osInfo_;
-    std::string packageInfo_;
-    std::string kernelInfo_;
-    std::string uptimeInfo_;
-    std::string shellInfo_;
-    std::string cpuInfo_;
-    std::string gpuInfo_;
-    std::string storageInfo_;
-    std::string ramInfo_;
-    std::string wmInfo_;
-    std::string mediaInfo_;
-};
-
 void runDaemon() {
-    SystemInfo systemInfo;
     // Daemonize the process
     daemonize();
 
@@ -575,28 +490,38 @@ void runDaemon() {
 
     // Run the daemon loop
     while (true) {
-        // Update system information
-        systemInfo.updateInfo();
+        // Run get<example>Info functions and store the output in tmp cache
+        std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
+                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
+                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
+                             getRamInfo() + "\n" + getWmInfo() + "\n" + getMediaInfo() + "\n\n";
 
-        // Sleep for 1 seconds
+        std::ofstream cacheFile("/tmp/blaze_info_cache.tmp");
+        cacheFile << output;
+        cacheFile.close();
+
+        // Sleep for 30 seconds
         sleep(1);
     }
 }
 
-void runProgram(const SystemInfo& systemInfo) {
-    // Fetch info from the SystemInfo instance
-    std::cout << "\n" << systemInfo.getTitleInfo() << "\n" << systemInfo.getOsInfo() << "\n"
-              << systemInfo.getPackageInfo() << "\n" << systemInfo.getKernelInfo() << "\n"
-              << systemInfo.getUptimeInfo() << "\n" << systemInfo.getShellInfo() << "\n"
-              << systemInfo.getCpuInfo() << "\n" << systemInfo.getGpuInfo() << "\n"
-              << systemInfo.getStorageInfo() << "\n" << systemInfo.getRamInfo() << "\n"
-              << systemInfo.getWmInfo() << "\n" << systemInfo.getMediaInfo() << "\n\n";
+void runProgram() {
+    if (!isDaemonRunning()) {
+        std::cout << "Ah oh! Blaze daemon is not running! Please run the blaze daemon first using -d or --daemon flag." << std::endl;
+        return;
+    }
+
+    // Fetch info from the cache in tmp
+    std::ifstream cacheFile("/tmp/blaze_info_cache.tmp");
+    std::string cachedInfo((std::istreambuf_iterator<char>(cacheFile)), std::istreambuf_iterator<char>());
+
+    // Display cached info
+    std::cout << "\n" << cachedInfo;
 
     colorPallate();
 }
 
 int main(int argc, char *argv[]) {
-    SystemInfo systemInfo;
     int runDaemonFlag = 0;
     int showVersionFlag = 0;
 
@@ -618,15 +543,13 @@ int main(int argc, char *argv[]) {
 
     srand(static_cast<unsigned int>(time(nullptr)));
 
-    
-
     if (runDaemonFlag) {
         // Run the daemon
         if (isDaemonRunning()) {
             std::cout << "Umm... Blaze daemon is already running?!" << std::endl;
             return 0;
         }
-        // Display the message when running in daemon mode
+            // Display the message when running in daemon mode
         std::cout << "\nBlaze daemon is running in the background." << std::endl;
         std::cout << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
 
@@ -634,7 +557,7 @@ int main(int argc, char *argv[]) {
         runDaemon();
     } else {
         // Run the program
-        runProgram(systemInfo);
+        runProgram();
     }
 
     return 0;
