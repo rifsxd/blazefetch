@@ -24,7 +24,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.1.0-BETA"
+#define VERSION "2.1.1-BETA"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
@@ -117,7 +117,7 @@ std::string getOsInfo() {
 std::string getKernelInfo() {
     struct utsname unameData;
     if (uname(&unameData) == 0) {
-        return "\033[33m" + std::string(KERNEL) + " \033[0m" + unameData.release;
+        return "\033[33m" + std::string(KERNEL) + " \033[0m" + std::string(unameData.sysname) + " " + unameData.release;
     } else {
         return "\033[33m" + std::string(KERNEL) + " \033[0mUnknown";
     }
