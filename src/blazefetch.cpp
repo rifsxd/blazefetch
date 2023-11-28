@@ -5,6 +5,7 @@
 #include <ctime>
 #include <fstream>
 #include <csignal>
+#include <fcntl.h>
 
 #include <sys/utsname.h>
 #include <sys/statvfs.h>
@@ -13,7 +14,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "1.1.0"
+#define VERSION "1.2.0"
 
 std::string getTitleInfo();
 std::string getUptimeInfo();
@@ -431,14 +432,65 @@ void signalHandler(int signum) {
     }
 }
 
+void daemonize() {
+    // Fork off the parent process
+    pid_t pid = fork();
+
+    // An error occurred
+    if (pid < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    // Success: Let the parent terminate
+    if (pid > 0) {
+        exit(EXIT_SUCCESS);
+    }
+
+    // On success: The child process becomes the session leader
+    if (setsid() < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    // Fork off for the second time
+    pid = fork();
+
+    // An error occurred
+    if (pid < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    // Success: Let the parent terminate
+    if (pid > 0) {
+        exit(EXIT_SUCCESS);
+    }
+
+    // Change the current working directory to root
+    if (chdir("/") < 0) {
+        exit(EXIT_FAILURE);
+    }
+
+    // Close all open file descriptors
+    for (int x = sysconf(_SC_OPEN_MAX); x >= 0; x--) {
+        close(x);
+    }
+
+    // Redirect standard input, output, and error streams
+    open("/dev/null", O_RDWR); // stdin
+    open("/dev/null", O_RDWR); // stdout
+    open("/dev/null", O_RDWR); // stderr
+}
+
 void runDaemon() {
+    // Daemonize the process
+    daemonize();
+
     // Set up signal handling
     signal(SIGTERM, signalHandler);
     signal(SIGINT, signalHandler);
 
     // Run the daemon loop
     while (true) {
-        // Run ge<example>Info functions and store the output in tmp cache
+        // Run get<example>Info functions and store the output in tmp cache
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
                              getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
                              getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
@@ -463,11 +515,8 @@ void runProgram() {
     std::ifstream cacheFile("/tmp/blaze_info_cache.tmp");
     std::string cachedInfo((std::istreambuf_iterator<char>(cacheFile)), std::istreambuf_iterator<char>());
 
-    std::cout << "\n";
-        runDaemon;
-
     // Display cached info
-    std::cout << cachedInfo;
+    std::cout << "\n" << cachedInfo;
 
     colorPallate();
 }
@@ -500,6 +549,9 @@ int main(int argc, char *argv[]) {
             std::cout << "Umm... Blaze daemon is already running?!" << std::endl;
             return 0;
         }
+            // Display the message when running in daemon mode
+        std::cout << "\nBlaze daemon is running in the background." << std::endl;
+        std::cout << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
 
         writeDaemonPid();
         runDaemon();
