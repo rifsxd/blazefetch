@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <vector>
+#include <dirent.h>
 
 
 #include <sys/shm.h>
@@ -15,12 +16,14 @@
 #include <sys/statvfs.h>
 #include <sys/ipc.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <ifaddrs.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.0.0-TESTING"
+#define VERSION "2.1.0-TESTING"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
@@ -49,6 +52,7 @@ std::string getGpuInfo();
 #define RAM "󰇻"
 #define WM "󰖲"
 #define MEDIA "󰲸"
+#define NETWORK "󰛳"
 #else
 #define OS "󰍹 OS:"
 #define PACKAGES "󰏓 PACKAGES:"
@@ -61,6 +65,7 @@ std::string getGpuInfo();
 #define RAM "󰇻 RAM:"
 #define WM "󰖲 WM:"
 #define MEDIA "󰲸 MEDIA:"
+#define NETWORK "󰛳 NETWORK:"
 /* basic words
 #define OS "OS:"
 #define PACKAGES "PACKAGES:"
@@ -414,6 +419,62 @@ std::string getMediaInfo() {
     return "\033[94m" + std::string(MEDIA) + " \033[0mUnknown";
 }
 
+std::string runNetworkInfoCMD(const char* command) {
+    char buffer[128];
+    std::string result = "";
+
+    // Open the command for reading
+    FILE* fp = popen(command, "r");
+    if (fp == nullptr) {
+        perror("popen");
+        return result;
+    }
+
+    // Read the output a line at a time
+    while (fgets(buffer, sizeof(buffer), fp) != nullptr) {
+        result += buffer;
+    }
+
+    // Close the file pointer
+    pclose(fp);
+
+    // Remove trailing newline character
+    result.erase(result.find_last_not_of("\n") + 1);
+
+    return result;
+}
+
+std::string getNetworkStatusInfo() {
+    std::string wiredInterfaceCommand = "ls /sys/class/net | grep -E '^enp[0-9]+s[0-9]+$'";
+    std::string wirelessInterfaceCommand = "ls /sys/class/net | grep -E '^wlan[0-9]+$'";
+
+    std::string activeInterface;
+
+    // Check for wired interface
+    activeInterface = runNetworkInfoCMD(wiredInterfaceCommand.c_str());
+    if (activeInterface.empty()) {
+        // Check for wireless interface
+        activeInterface = runNetworkInfoCMD(wirelessInterfaceCommand.c_str());
+    }
+
+    if (!activeInterface.empty()) {
+        std::string connectionStateCommand = "nmcli dev show " + activeInterface + " | grep -E '^GENERAL.STATE' | awk '{print $2}'";
+        std::string connectionState = runNetworkInfoCMD(connectionStateCommand.c_str());
+
+        if (!connectionState.empty()) {
+            int state = std::stoi(connectionState);
+            if (state == 100) {
+                std::string interfaceType = activeInterface.substr(0, 3); // Extract "enp" or "wlan"
+                return "\033[94mNETWORK \033[0mConnected (" + interfaceType + ": " + activeInterface + ")";
+            } else if (state == 30) {
+                return "\033[94mNETWORK \033[0mDisconnected";
+            }
+        }
+    }
+
+    return "\033[94mNETWORK \033[0mUnknown";
+}
+
 void colorPallate() {
 
     std::cout << "";
@@ -563,7 +624,7 @@ void runDaemon() {
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
-                            getRamInfo() + "\n" + getWmInfo() + "\n" + getMediaInfo() + "\n\n";
+                            getRamInfo() + "\n" + getWmInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n\n";
 
         // Update shared memory
         std::strcpy(shm, output.c_str());
@@ -636,6 +697,8 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
             std::cout << getWmInfo() << std::endl;
         } else if (info == "MEDIA") {
             std::cout << getMediaInfo() << std::endl;
+        } else if (info == "NETWORK") {
+            std::cout << getNetworkStatusInfo() << std::endl;
         } else {
             std::cerr << "Invalid information type: " << info << std::endl;
         }
