@@ -614,12 +614,6 @@ int main(int argc, char *argv[]) {
     char* shm = attachSharedMemory(shmid);
 
     // Correct the function calls
-    if (runDaemonFlag) {
-        runDaemon();
-    } else {
-        runProgram();
-    }
-
     detachSharedMemory(shm);
 
     if (runDaemonFlag) {
