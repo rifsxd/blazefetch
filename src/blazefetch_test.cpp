@@ -675,7 +675,9 @@ void printHelp() {
 
 void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
     for (const auto& info : infoTypes) {
-        if (info == "OS") {
+        if (info == "USER") {
+            std::cout << getTitleInfo() << std::endl;
+        } else if (info == "OS") {
             std::cout << getOsInfo() << std::endl;
         } else if (info == "PACKAGES") {
             std::cout << getPackageInfo() << std::endl;
