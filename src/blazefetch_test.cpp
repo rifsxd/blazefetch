@@ -19,6 +19,8 @@
 
 #define VERSION "2.0.0-TESTING"
 #define SHM_SIZE 4096
+#define LOCK_FILE_PATH "/tmp/blazefetch.lock"
+
 
 std::string getTitleInfo();
 std::string getUptimeInfo();
@@ -413,6 +415,11 @@ void colorPallate() {
 void signalHandler(int signum) {
     // Handle signals, e.g., clean up and exit
     if (signum == SIGTERM || signum == SIGINT) {
+        // Remove the lock file before exiting
+        if (unlink(LOCK_FILE_PATH) == -1) {
+            perror("unlink");
+            exit(EXIT_FAILURE);
+        }
         exit(0);
     }
 }
@@ -498,6 +505,22 @@ void removeSharedMemory(int shmid) {
 }
 
 void runDaemon() {
+    // Set up signal handling
+    signal(SIGTERM, signalHandler);
+    signal(SIGINT, signalHandler);
+
+    // Check if the lock file exists
+    if (access(LOCK_FILE_PATH, F_OK) != -1) {
+        std::cerr << "Daemon is already running." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    // Create the lock file
+    int lockFile = open(LOCK_FILE_PATH, O_CREAT | O_WRONLY, 0644);
+    if (lockFile == -1) {
+        perror("open");
+        exit(EXIT_FAILURE);
+    }
     // Daemonize the process
     daemonize();
 
@@ -534,6 +557,11 @@ void runDaemon() {
 
     // Remove the shared memory segment (optional, depending on your requirements)
     shmctl(shmid, IPC_RMID, NULL);
+    // Remove the lock file before exiting
+    if (unlink(LOCK_FILE_PATH) == -1) {
+        perror("unlink");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void runProgram() {
@@ -583,6 +611,8 @@ int main(int argc, char *argv[]) {
 
     // Correct the function calls
     if (runDaemonFlag) {
+        std::cout << "\nBlaze daemon is running in the background." << std::endl;
+        std::cout << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
         runDaemon();
     } else {
         runProgram();
@@ -591,7 +621,16 @@ int main(int argc, char *argv[]) {
     detachSharedMemory(shm);
 
     if (runDaemonFlag) {
-        removeSharedMemory(shmid);
+        // Display the message when running in daemon mode
+        // Check if the daemon is already running
+        if (access(LOCK_FILE_PATH, F_OK) != -1) {
+            std::cout << "Daemon is already running." << std::endl;
+            return 0;
+        }
+
+        runDaemon();
+    } else {
+        runProgram();
     }
 
     return 0;

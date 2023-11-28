@@ -626,7 +626,7 @@ int main(int argc, char *argv[]) {
             std::cout << "Umm... Blaze daemon is already running?!" << std::endl;
             return 0;
         }
-            // Display the message when running in daemon mode
+        // Display the message when running in daemon mode
         std::cout << "\nBlaze daemon is running in the background." << std::endl;
         std::cout << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
 
