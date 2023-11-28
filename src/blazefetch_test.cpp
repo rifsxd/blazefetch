@@ -603,7 +603,7 @@ int main(int argc, char *argv[]) {
 
     // Check if the daemon is already running (excluding -v and --daemon flags)
     if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showVersionFlag) {
-        std::cerr << "Blaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first." << std::endl;
+        std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
     }
 
