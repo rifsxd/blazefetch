@@ -511,7 +511,7 @@ void runDaemon() {
 
     // Check if the lock file exists
     if (access(LOCK_FILE_PATH, F_OK) != -1) {
-        std::cerr << "Daemon is already running." << std::endl;
+        std::cerr << "Umm... Blaze daemon is already running?!" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -521,6 +521,10 @@ void runDaemon() {
         perror("open");
         exit(EXIT_FAILURE);
     }
+
+    // Display the message only when creating the lock file for the first time
+    std::cout << "\nBlaze daemon is running in the background." << std::endl;
+    std::cout << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
     // Daemonize the process
     daemonize();
 
@@ -611,8 +615,6 @@ int main(int argc, char *argv[]) {
 
     // Correct the function calls
     if (runDaemonFlag) {
-        std::cout << "\nBlaze daemon is running in the background." << std::endl;
-        std::cout << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
         runDaemon();
     } else {
         runProgram();
