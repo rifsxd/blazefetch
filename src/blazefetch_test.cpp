@@ -6,6 +6,9 @@
 #include <fstream>
 #include <csignal>
 #include <fcntl.h>
+#include <getopt.h>
+#include <vector>
+
 
 #include <sys/shm.h>
 #include <sys/utsname.h>
@@ -587,6 +590,53 @@ void runProgram() {
     shmdt(shm);
 }
 
+void printHelp() {
+    std::cout << "\nUsage: blazefetch [OPTIONS]\n"
+              << "Options:\n"
+              << "  -g, --get INFO    Get and display specific information (e.g., OS, GPU)\n"
+              << "  -d, --daemon      Run as a daemon\n"
+              << "  -v, --version     Show version information\n"
+              << "  -h, --help        Show this help message\n";
+}
+
+void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
+    for (const auto& info : infoTypes) {
+        if (info == "OS") {
+            std::cout << getOsInfo() << std::endl;
+        } else if (info == "PACKAGES") {
+            std::cout << getPackageInfo() << std::endl;
+        } else if (info == "KERNEL") {
+            std::cout << getKernelInfo() << std::endl;
+        } else if (info == "UPTIME") {
+            std::cout << getUptimeInfo() << std::endl;
+        } else if (info == "SHELL") {
+            std::cout << getShellInfo() << std::endl;
+        } else if (info == "CPU") {
+            std::cout << getCpuInfo() << std::endl;
+        } else if (info == "GPU") {
+            std::cout << getGpuInfo() << std::endl;
+        } else if (info == "DISK") {
+            std::cout << getStorageInfo() << std::endl;
+        } else if (info == "RAM") {
+            std::cout << getRamInfo() << std::endl;
+        } else if (info == "WM") {
+            std::cout << getWmInfo() << std::endl;
+        } else if (info == "MEDIA") {
+            std::cout << getMediaInfo() << std::endl;
+        } else {
+            std::cerr << "Invalid information type: " << info << std::endl;
+        }
+    }
+}
+
+const struct option longOptions[] = {
+    {"daemon", no_argument, NULL, 'd'},
+    {"version", no_argument, NULL, 'v'},
+    {"get", required_argument, NULL, 'g'},
+    {"help", no_argument, NULL, 'h'},
+    {NULL, 0, NULL, 0} // End of the array
+};
+
 int main(int argc, char *argv[]) {
     // Declare the missing identifiers
     int runDaemonFlag = 0;
@@ -598,6 +648,8 @@ int main(int argc, char *argv[]) {
             runDaemonFlag = 1;
         } else if (std::strcmp(argv[i], "-v") == 0 || std::strcmp(argv[i], "--version") == 0) {
             showVersionFlag = 1;
+        } else if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
+            printHelp();
         }
     }
 
@@ -605,6 +657,31 @@ int main(int argc, char *argv[]) {
     if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showVersionFlag) {
         std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
+    }
+
+    const char* getInfo = nullptr; // Variable to store the specified information to fetch
+
+    std::vector<std::string> getInfoTypes;
+
+    int opt;
+    while ((opt = getopt_long(argc, argv, "dg:vh", longOptions, NULL)) != -1) {
+        switch (opt) {
+            case 'd':
+                runDaemonFlag = 1;
+                break;
+            case 'g':
+                getInfoTypes.push_back(optarg);
+                break;
+            case 'v':
+                showVersionFlag = 1;
+                break;
+            case 'h':
+                printHelp();
+                return 0;
+            default:
+                printHelp();
+                return 1;
+        }
     }
 
     if (showVersionFlag) {
@@ -624,6 +701,8 @@ int main(int argc, char *argv[]) {
 
     if (runDaemonFlag) {
         runDaemon();
+    } else if (!getInfoTypes.empty()) {
+        getInfoAndPrint(getInfoTypes);
     } else {
         runProgram();
     }
