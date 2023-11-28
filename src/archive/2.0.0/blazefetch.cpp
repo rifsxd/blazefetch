@@ -8,8 +8,6 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <vector>
-#include <dirent.h>
-#include <unordered_map>
 
 
 #include <sys/shm.h>
@@ -17,14 +15,12 @@
 #include <sys/statvfs.h>
 #include <sys/ipc.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <ifaddrs.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.1.0-BETA"
+#define VERSION "2.0.0-BETA"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
@@ -53,7 +49,6 @@ std::string getGpuInfo();
 #define RAM "󰇻"
 #define WM "󰖲"
 #define MEDIA "󰲸"
-#define NETWORK "󰛳"
 #else
 #define OS "󰍹 OS:"
 #define PACKAGES "󰏓 PACKAGES:"
@@ -66,7 +61,6 @@ std::string getGpuInfo();
 #define RAM "󰇻 RAM:"
 #define WM "󰖲 WM:"
 #define MEDIA "󰲸 MEDIA:"
-#define NETWORK "󰛳 NETWORK:"
 /* basic words
 #define OS "OS:"
 #define PACKAGES "PACKAGES:"
@@ -355,31 +349,19 @@ std::string getCpuInfo() {
     FILE *cpuinfo = fopen("/proc/cpuinfo", "r");
     if (cpuinfo) {
         char line[256];
-        std::unordered_map<std::string, int> cpuModels;
+        int cpuCount = 0;
 
         while (fgets(line, sizeof(line), cpuinfo) != NULL) {
             if (strstr(line, "model name")) {
+                cpuCount++;
                 char *model = strchr(line, ':') + 2;
                 model[strlen(model) - 1] = '\0'; // Remove the trailing newline
-                cpuModels[std::string(model)]++;
+                fclose(cpuinfo);
+                return "\033[95m" + std::string(CPU) + " \033[0m" + std::string(model) + " (x" + std::to_string(cpuCount) + ")";
             }
         }
 
         fclose(cpuinfo);
-
-        if (!cpuModels.empty()) {
-            std::string result = "\033[95m" + std::string(CPU) + " \033[0m";
-            
-            for (const auto& entry : cpuModels) {
-                result += entry.first + " (x" + std::to_string(entry.second) + "), ";
-            }
-
-            // Remove the trailing comma and space
-            result.pop_back();
-            result.pop_back();
-            
-            return result;
-        }
     }
 
     return "\033[95m" + std::string(CPU) + " \033[0mUnknown";
@@ -431,69 +413,6 @@ std::string getMediaInfo() {
 
     return "\033[94m" + std::string(MEDIA) + " \033[0mUnknown";
 }
-
-std::string runNetworkInfoCMD(const char* command) {
-    char buffer[128];
-    std::string result = "";
-
-    // Open the command for reading
-    FILE* fp = popen(command, "r");
-    if (fp == nullptr) {
-        perror("popen");
-        return result;
-    }
-
-    // Read the output a line at a time
-    while (fgets(buffer, sizeof(buffer), fp) != nullptr) {
-        result += buffer;
-    }
-
-    // Close the file pointer
-    pclose(fp);
-
-    // Remove trailing newline character
-    result.erase(result.find_last_not_of("\n") + 1);
-
-    return result;
-}
-
-std::string getNetworkStatusInfo() {
-    std::string wiredInterfaceCommand = "ls /sys/class/net | grep -E '^enp[0-9]+s[0-9]+$'";
-    std::string wirelessInterfaceCommand1 = "ls /sys/class/net | grep -E '^wlan[0-9]+$'";
-    std::string wirelessInterfaceCommand2 = "ls /sys/class/net | grep -E '^wlp[0-9]+s[0-9]+$'";
-
-    std::string activeInterface;
-
-    // Check for wired interface
-    activeInterface = runNetworkInfoCMD(wiredInterfaceCommand.c_str());
-    if (activeInterface.empty()) {
-        // Check for wireless interface using the first pattern
-        activeInterface = runNetworkInfoCMD(wirelessInterfaceCommand1.c_str());
-
-        // If the first pattern is null, try the second pattern
-        if (activeInterface.empty()) {
-            activeInterface = runNetworkInfoCMD(wirelessInterfaceCommand2.c_str());
-        }
-    }
-
-    if (!activeInterface.empty()) {
-        std::string connectionStateCommand = "nmcli dev show " + activeInterface + " | grep -E '^GENERAL.STATE' | awk '{print $2}'";
-        std::string connectionState = runNetworkInfoCMD(connectionStateCommand.c_str());
-
-        if (!connectionState.empty()) {
-            int state = std::stoi(connectionState);
-            if (state == 100) {
-                std::string interfaceType = activeInterface.substr(0, 3); // Extract "enp" or "wlan" or "wlp"
-                return "\033[94m" + std::string(NETWORK) + " \033[0mConnected (" + interfaceType + ": " + activeInterface + ")";
-            } else if (state == 30) {
-                return "\033[94m" + std::string(NETWORK) + " \033[0mDisconnected";
-            }
-        }
-    }
-
-    return "\033[94mNETWORK \033[0mUnknown";
-}
-
 
 void colorPallate() {
 
@@ -644,7 +563,7 @@ void runDaemon() {
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
-                            getRamInfo() + "\n" + getWmInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n\n";
+                            getRamInfo() + "\n" + getWmInfo() + "\n" + getMediaInfo() + "\n\n";
 
         // Update shared memory
         std::strcpy(shm, output.c_str());
@@ -695,9 +614,7 @@ void printHelp() {
 
 void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
     for (const auto& info : infoTypes) {
-        if (info == "USER") {
-            std::cout << getTitleInfo() << std::endl;
-        } else if (info == "OS") {
+        if (info == "OS") {
             std::cout << getOsInfo() << std::endl;
         } else if (info == "PACKAGES") {
             std::cout << getPackageInfo() << std::endl;
@@ -719,8 +636,6 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
             std::cout << getWmInfo() << std::endl;
         } else if (info == "MEDIA") {
             std::cout << getMediaInfo() << std::endl;
-        } else if (info == "NETWORK") {
-            std::cout << getNetworkStatusInfo() << std::endl;
         } else {
             std::cerr << "Invalid information type: " << info << std::endl;
         }
