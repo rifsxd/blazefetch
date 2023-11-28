@@ -470,7 +470,7 @@ std::string getNetworkStatusInfo() {
         if (!connectionState.empty()) {
             int state = std::stoi(connectionState);
             if (state == 100) {
-                std::string interfaceType = activeInterface.substr(0, 3); // Extract "enp" or "wlan"
+                std::string interfaceType = activeInterface.substr(0, 3); // Extract "enp" or "wlan" or "wlp"
                 return "\033[94m" + std::string(NETWORK) + " \033[0mConnected (" + interfaceType + ": " + activeInterface + ")";
             } else if (state == 30) {
                 return "\033[94m" + std::string(NETWORK) + " \033[0mDisconnected";
