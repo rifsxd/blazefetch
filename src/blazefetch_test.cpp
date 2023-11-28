@@ -511,7 +511,7 @@ void runDaemon() {
 
     // Check if the lock file exists
     if (access(LOCK_FILE_PATH, F_OK) != -1) {
-        std::cerr << "Umm... Blaze daemon is already running?!" << std::endl;
+        std::cerr << "\nUmm... Blaze daemon is already running?!\n" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -601,6 +601,12 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // Check if the daemon is already running
+    if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1) {
+        std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
+        return EXIT_FAILURE;
+    }
+
     if (showVersionFlag) {
         std::cout << "\nBlazefetch version " << VERSION << std::endl;
         std::cout << "Copyright\u00A9 2023 RifsxD" << std::endl;
@@ -617,13 +623,6 @@ int main(int argc, char *argv[]) {
     detachSharedMemory(shm);
 
     if (runDaemonFlag) {
-        // Display the message when running in daemon mode
-        // Check if the daemon is already running
-        if (access(LOCK_FILE_PATH, F_OK) != -1) {
-            std::cout << "Daemon is already running." << std::endl;
-            return 0;
-        }
-
         runDaemon();
     } else {
         runProgram();
