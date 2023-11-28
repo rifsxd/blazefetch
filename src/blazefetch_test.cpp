@@ -446,15 +446,21 @@ std::string runNetworkInfoCMD(const char* command) {
 
 std::string getNetworkStatusInfo() {
     std::string wiredInterfaceCommand = "ls /sys/class/net | grep -E '^enp[0-9]+s[0-9]+$'";
-    std::string wirelessInterfaceCommand = "ls /sys/class/net | grep -E '^wlan[0-9]+$'";
+    std::string wirelessInterfaceCommand1 = "ls /sys/class/net | grep -E '^wlan[0-9]+$'";
+    std::string wirelessInterfaceCommand2 = "ls /sys/class/net | grep -E '^wlp[0-9]+s[0-9]+$'";
 
     std::string activeInterface;
 
     // Check for wired interface
     activeInterface = runNetworkInfoCMD(wiredInterfaceCommand.c_str());
     if (activeInterface.empty()) {
-        // Check for wireless interface
-        activeInterface = runNetworkInfoCMD(wirelessInterfaceCommand.c_str());
+        // Check for wireless interface using the first pattern
+        activeInterface = runNetworkInfoCMD(wirelessInterfaceCommand1.c_str());
+
+        // If the first pattern is null, try the second pattern
+        if (activeInterface.empty()) {
+            activeInterface = runNetworkInfoCMD(wirelessInterfaceCommand2.c_str());
+        }
     }
 
     if (!activeInterface.empty()) {
@@ -474,6 +480,7 @@ std::string getNetworkStatusInfo() {
 
     return "\033[94mNETWORK \033[0mUnknown";
 }
+
 
 void colorPallate() {
 
