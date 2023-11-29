@@ -24,7 +24,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.1.0-TESTING"
+#define VERSION "2.1.1-BETA"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
@@ -35,7 +35,7 @@ std::string getOsInfo();
 std::string getRamInfo();
 std::string getKernelInfo();
 std::string getShellInfo();
-std::string getWmInfo();
+std::string getDEInfo();
 std::string getPackageInfo();
 std::string getStorageInfo();
 std::string getCpuInfo();
@@ -51,7 +51,7 @@ std::string getGpuInfo();
 #define GPU "󰿵"
 #define DISK "󰋊"
 #define RAM "󰇻"
-#define WM "󰖲"
+#define DE "󰖲"
 #define MEDIA "󰲸"
 #define NETWORK "󰛳"
 #else
@@ -64,7 +64,7 @@ std::string getGpuInfo();
 #define GPU "󰿵 GPU:"
 #define DISK "󰋊 DISK:"
 #define RAM "󰇻 RAM:"
-#define WM "󰖲 WM:"
+#define DE "󰖲 DE:"
 #define MEDIA "󰲸 MEDIA:"
 #define NETWORK "󰛳 NETWORK:"
 /* basic words
@@ -117,7 +117,7 @@ std::string getOsInfo() {
 std::string getKernelInfo() {
     struct utsname unameData;
     if (uname(&unameData) == 0) {
-        return "\033[33m" + std::string(KERNEL) + " \033[0m" + unameData.release;
+        return "\033[33m" + std::string(KERNEL) + " \033[0m" + std::string(unameData.sysname) + " " + unameData.release;
     } else {
         return "\033[33m" + std::string(KERNEL) + " \033[0mUnknown";
     }
@@ -137,11 +137,11 @@ std::string getShellInfo() {
     }
 }
 
-std::string getWmInfo() {
+std::string getDEInfo() {
     char *waylandDisplay = getenv("WAYLAND_DISPLAY");
     if (waylandDisplay) {
         char *xdgDesktop = getenv("XDG_CURRENT_DESKTOP");
-        return "\033[38;5;93m" + std::string(WM) + " \033[0m" + (xdgDesktop ? xdgDesktop : "Unknown");
+        return "\033[38;5;93m" + std::string(DE) + " \033[0m" + (xdgDesktop ? xdgDesktop : "Unknown");
     } else {
         Display *display = XOpenDisplay(NULL);
         if (display) {
@@ -169,7 +169,7 @@ std::string getWmInfo() {
                         std::string wmName(reinterpret_cast<char*>(propValue));
                         XFree(propValue);
                         XCloseDisplay(display);
-                        return "\033[38;5;93m" + std::string(WM) + " \033[0m" + wmName;
+                        return "\033[38;5;93m" + std::string(DE) + " \033[0m" + wmName;
                     }
                 }
             }
@@ -178,7 +178,7 @@ std::string getWmInfo() {
         }
     }
 
-    return "\033[38;5;93m" + std::string(WM) + " \033[0mUnknown";
+    return "\033[38;5;93m" + std::string(DE) + " \033[0mUnknown";
 }
 
 std::string getUptimeInfo() {
@@ -491,7 +491,7 @@ std::string getNetworkStatusInfo() {
         }
     }
 
-    return "\033[94mNETWORK \033[0mUnknown";
+    return "\033[94m" + std::string(NETWORK) + " \033[0mUnknown";
 }
 
 
@@ -644,7 +644,7 @@ void runDaemon() {
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
-                            getRamInfo() + "\n" + getWmInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n\n";
+                            getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n\n";
 
         // Update shared memory
         std::strcpy(shm, output.c_str());
@@ -715,8 +715,8 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
             std::cout << getStorageInfo() << std::endl;
         } else if (info == "RAM") {
             std::cout << getRamInfo() << std::endl;
-        } else if (info == "WM") {
-            std::cout << getWmInfo() << std::endl;
+        } else if (info == "DE") {
+            std::cout << getDEInfo() << std::endl;
         } else if (info == "MEDIA") {
             std::cout << getMediaInfo() << std::endl;
         } else if (info == "NETWORK") {
