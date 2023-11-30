@@ -23,28 +23,16 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.3.0-TESTING"
+#define VERSION "2.3.2-BETA"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
-
-
-std::string getTitleInfo();
-std::string getUptimeInfo();
-std::string getOsInfo();
-std::string getRamInfo();
-std::string getKernelInfo();
-std::string getShellInfo();
-std::string getDEInfo();
-std::string getPackageInfo();
-std::string getStorageInfo();
-std::string getCpuInfo();
-std::string getGpuInfo();
 
 #ifdef ICONIC
 #define OS "󰍹"
 #define PACKAGES "󰏓"
 #define KERNEL "󰌽"
-#define UPTIME "󱑁"
+#define UPTIME "󱘿"
+#define TIME "󱑁"
 #define SHELL ""
 #define CPU ""
 #define GPU "󰿵"
@@ -57,7 +45,8 @@ std::string getGpuInfo();
 #define OS "󰍹 OS:"
 #define PACKAGES "󰏓 PACKAGES:"
 #define KERNEL "󰌽 KERNEL:"
-#define UPTIME "󱑁 UPTIME:"
+#define UPTIME "󱘿 UPTIME:"
+#define TIME "󱑁 TIME:"
 #define SHELL " SHELL:"
 #define CPU " CPU:"
 #define GPU "󰿵 GPU:"
@@ -80,6 +69,8 @@ std::string getGpuInfo();
 #define MEDIA "MEDIA:"
 */
 #endif
+
+// -------------------------------------------------------------- Info Func Start Point -------------------------------------------------------------- //
 
 std::string getTitleInfo() {
     char username[256];
@@ -506,6 +497,15 @@ std::string getNetworkStatusInfo() {
     return "\033[94m" + std::string(NETWORK) + " \033[0mUnknown";
 }
 
+std::string getTimeInfo() {
+    std::time_t currentTime = std::time(nullptr);
+    std::tm* localTime = std::localtime(&currentTime);
+    char timeBuffer[80];
+    std::strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", localTime);
+    return "\033[96m" + std::string(TIME) + " \033[0m" + std::string(timeBuffer);
+}
+
+// -------------------------------------------------------------- Info Func End Point -------------------------------------------------------------- //
 
 void colorPallate() {
 
@@ -677,7 +677,7 @@ void runDaemon() {
 
         // Run get<example>Info functions and store the output in shared memory
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
-                            getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
+                            getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getTimeInfo() + "\n" + getShellInfo() + "\n" +
                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
                             getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n\n";
 
@@ -740,6 +740,8 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
         } else if (info == "KERNEL") {
             std::cout << getKernelInfo() << std::endl;
         } else if (info == "UPTIME") {
+            std::cout << getTimeInfo() << std::endl;
+        } else if (info == "TIME") {
             std::cout << getUptimeInfo() << std::endl;
         } else if (info == "SHELL") {
             std::cout << getShellInfo() << std::endl;
@@ -791,7 +793,6 @@ int main(int argc, char *argv[]) {
             clearMemoryFlag = 1;
         } else if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
             showHelpFlag = 1;
-        } else if (std::strcmp(argv[i], "-g") == 0 || std::strcmp(argv[i], "--get") == 0) {
         }
     }
 
@@ -825,7 +826,7 @@ int main(int argc, char *argv[]) {
                 break;
             default:
                 showHelpFlag = 1;
-                return 1;
+                break;
         }
     }
 
@@ -850,6 +851,8 @@ int main(int argc, char *argv[]) {
         std::cout << "Blazefetch version " << VERSION << std::endl;
     } else if (clearMemoryFlag) {
         clearStoredMemory();
+    } else if (!getInfoTypes.empty()) {
+        getInfoAndPrint(getInfoTypes);
     } else if (showHelpFlag) {
         printHelp();
     } else {
