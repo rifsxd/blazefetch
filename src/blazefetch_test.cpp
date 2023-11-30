@@ -24,7 +24,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.2.1-TESTING"
+#define VERSION "2.2.2-BETA"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
@@ -138,56 +138,61 @@ std::string getShellInfo() {
 }
 
 std::string getDEInfo() {
-    char *waylandDisplay = getenv("WAYLAND_DISPLAYY");
+    char *waylandDisplay = getenv("WAYLAND_DISPLAY");
     char *Session = getenv("XDG_SESSION_TYPE");
 
     if (strstr(Session, "wayland") != nullptr) {
         char *xdgDesktop = getenv("XDG_CURRENT_DESKTOP");
         return "\033[38;5;93m" + std::string(DE) + " \033[0m" + (xdgDesktop ? xdgDesktop : "Unknown");
-    } else if (strstr(Session, "x11") != nullptr) {
+    } else if ((waylandDisplay) != nullptr) {
         char *xdgDesktop = getenv("XDG_CURRENT_DESKTOP");
         return "\033[38;5;93m" + std::string(DE) + " \033[0m" + (xdgDesktop ? xdgDesktop : "Unknown");
-    } else if ((waylandDisplay) != nullptr) {
-        char *xdgDesktop = getenv("HOME");
-        return "\033[38;5;93m" + std::string(DE) + " \033[0m" + (xdgDesktop ? xdgDesktop : "Unknown");
-    } else {
-        Display *display = XOpenDisplay(NULL);
-        if (display) {
-            Window root = DefaultRootWindow(display);
+    } else if (strstr(Session, "x11") != nullptr) {
+        char *xdgDesktop = getenv("XDG_CURRENT_DESKTOP");
+        if (xdgDesktop) {
+            return "\033[38;5;93m" + std::string(DE) + " \033[0m" + xdgDesktop;
+        }
+    }
 
-            Atom netSupportingWmCheckAtom = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
-            Atom netWmNameAtom = XInternAtom(display, "_NET_WM_NAME", False);
-            Atom utf8StringAtom = XInternAtom(display, "UTF8_STRING", False);
+    // Fall back to the final else block if none of the conditions are met
+    Display *display = XOpenDisplay(NULL);
+    if (display) {
+        Window root = DefaultRootWindow(display);
 
-            if (netSupportingWmCheckAtom != None && netWmNameAtom != None) {
-                Atom actualType;
-                int actualFormat;
-                unsigned long nItems, bytesAfter;
-                unsigned char *propValue = NULL;
+        Atom netSupportingWmCheckAtom = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
+        Atom netWmNameAtom = XInternAtom(display, "_NET_WM_NAME", False);
+        Atom utf8StringAtom = XInternAtom(display, "UTF8_STRING", False);
 
-                if (XGetWindowProperty(display, root, netSupportingWmCheckAtom, 0, 1, False,
-                                       XA_WINDOW, &actualType, &actualFormat,
+        if (netSupportingWmCheckAtom != None && netWmNameAtom != None) {
+            Atom actualType;
+            int actualFormat;
+            unsigned long nItems, bytesAfter;
+            unsigned char *propValue = NULL;
+
+            if (XGetWindowProperty(display, root, netSupportingWmCheckAtom, 0, 1, False,
+                                   XA_WINDOW, &actualType, &actualFormat,
+                                   &nItems, &bytesAfter, &propValue) == Success && propValue) {
+                Window supportingWmCheck = *((Window *)propValue);
+                XFree(propValue);
+
+                if (XGetWindowProperty(display, supportingWmCheck, netWmNameAtom, 0, 1024, False,
+                                       utf8StringAtom, &actualType, &actualFormat,
                                        &nItems, &bytesAfter, &propValue) == Success && propValue) {
-                    Window supportingWmCheck = *((Window *)propValue);
+                    std::string wmName(reinterpret_cast<char*>(propValue));
                     XFree(propValue);
-
-                    if (XGetWindowProperty(display, supportingWmCheck, netWmNameAtom, 0, 1024, False,
-                                           utf8StringAtom, &actualType, &actualFormat,
-                                           &nItems, &bytesAfter, &propValue) == Success && propValue) {
-                        std::string wmName(reinterpret_cast<char*>(propValue));
-                        XFree(propValue);
-                        XCloseDisplay(display);
-                        return "\033[38;5;93m" + std::string(DE) + " \033[0m" + wmName;
-                    }
+                    XCloseDisplay(display);
+                    return "\033[38;5;93m" + std::string(DE) + " \033[0m" + wmName;
                 }
             }
-
-            XCloseDisplay(display);
         }
+
+        XCloseDisplay(display);
     }
 
     return "\033[38;5;93m" + std::string(DE) + " \033[0mUnknown";
 }
+
+
 
 std::string getUptimeInfo() {
     FILE *uptimeFile = fopen("/proc/uptime", "r");
@@ -648,6 +653,10 @@ void runDaemon() {
 
     // Run the daemon loop
     while (true) {
+
+        // Clear shared memory content
+        memset(shm, 0, SHM_SIZE);
+
         // Run get<example>Info functions and store the output in shared memory
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getShellInfo() + "\n" +
