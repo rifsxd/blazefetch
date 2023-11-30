@@ -23,7 +23,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.3.2-BETA"
+#define VERSION "2.4.0-TESTING"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
@@ -41,6 +41,8 @@
 #define DE "󰖲"
 #define MEDIA "󰲸"
 #define NETWORK "󰛳"
+#define TERM ""
+#define TERM_PROG ""
 #else
 #define OS "󰍹 OS:"
 #define PACKAGES "󰏓 PACKAGES:"
@@ -55,6 +57,8 @@
 #define DE "󰖲 DE:"
 #define MEDIA "󰲸 MEDIA:"
 #define NETWORK "󰛳 NETWORK:"
+#define TERM " TERMINAL:"
+#define TERM_PROG " TERMINAL_PROGRAM:"
 /* basic words
 #define OS "OS:"
 #define PACKAGES "PACKAGES:"
@@ -505,6 +509,24 @@ std::string getTimeInfo() {
     return "\033[96m" + std::string(TIME) + " \033[0m" + std::string(timeBuffer);
 }
 
+std::string getTerminalInfo() {
+    char* term = getenv("TERM");
+    char* termProgram = getenv("TERM_PROGRAM");
+
+    if (term != nullptr) {
+        std::string terminal = "\033[35m" + std::string(TERM) + " \033[0m" + std::string(term);
+        
+        if (termProgram != nullptr) {
+            terminal += "\n\033[32m╰─| \033[35m" + std::string(TERM_PROG) + " \033[0m" + std::string(termProgram);
+        }
+
+        return terminal;
+    } else {
+        return "\033[35mTerminal information not available\033[0m";
+    }
+    return "\033[35m" + std::string(TERM) + " \033[0mUnknown";
+}
+
 // -------------------------------------------------------------- Info Func End Point -------------------------------------------------------------- //
 
 void colorPallate() {
@@ -679,7 +701,7 @@ void runDaemon() {
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getTimeInfo() + "\n" + getShellInfo() + "\n" +
                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
-                            getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n\n";
+                            getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n" + getTerminalInfo() + "\n\n";
 
         // Update shared memory
         std::strcpy(shm, output.c_str());
@@ -759,6 +781,8 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
             std::cout << getMediaInfo() << std::endl;
         } else if (info == "NETWORK") {
             std::cout << getNetworkStatusInfo() << std::endl;
+        } else if (info == "TERM") {
+            std::cout << getTerminalInfo() << std::endl;
         } else {
             std::cerr << "Invalid information type: " << info << std::endl;
         }
