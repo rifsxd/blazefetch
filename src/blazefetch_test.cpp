@@ -703,7 +703,7 @@ void runDaemon() {
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getTimeInfo() + "\n" + getShellInfo() + "\n" +
                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
-                            getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n" /* + getTerminalInfo() */ + "\n\n"; // ENABLE getTerminalInfo()
+                            getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() /* + getTerminalInfo() */ + "\n\n"; // ENABLE getTerminalInfo()
 
         // Update shared memory
         std::strcpy(shm, output.c_str());
