@@ -23,7 +23,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.4.0-TESTING"
+#define VERSION "2.4.1-TESTING"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
@@ -509,6 +509,8 @@ std::string getTimeInfo() {
     return "\033[96m" + std::string(TIME) + " \033[0m" + std::string(timeBuffer);
 }
 
+/* ENABLE IF YOU NEED IT - ALSO ENABLE IN LINES 706 & 786
+
 std::string getTerminalInfo() {
     char* term = getenv("TERM");
     char* termProgram = getenv("TERM_PROGRAM");
@@ -522,10 +524,10 @@ std::string getTerminalInfo() {
 
         return terminal;
     } else {
-        return "\033[35mTerminal information not available\033[0m";
+        return "\033[35m" + std::string(TERM) + " \033[0mUnknown... \033[35mTerminal information not available?!\033[0m";
     }
-    return "\033[35m" + std::string(TERM) + " \033[0mUnknown";
 }
+*/
 
 // -------------------------------------------------------------- Info Func End Point -------------------------------------------------------------- //
 
@@ -701,7 +703,7 @@ void runDaemon() {
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getTimeInfo() + "\n" + getShellInfo() + "\n" +
                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
-                            getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n" + getTerminalInfo() + "\n\n";
+                            getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n" /* + getTerminalInfo() */ + "\n\n"; // ENABLE getTerminalInfo()
 
         // Update shared memory
         std::strcpy(shm, output.c_str());
@@ -781,8 +783,8 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
             std::cout << getMediaInfo() << std::endl;
         } else if (info == "NETWORK") {
             std::cout << getNetworkStatusInfo() << std::endl;
-        } else if (info == "TERM") {
-            std::cout << getTerminalInfo() << std::endl;
+        /* } else if (info == "TERM") {  // ENABLE TERM
+            std::cout << getTerminalInfo() << std::endl; */
         } else {
             std::cerr << "Invalid information type: " << info << std::endl;
         }
