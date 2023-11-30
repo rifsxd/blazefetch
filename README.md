@@ -31,11 +31,11 @@ sudo make clean install_iconic
 # Usage
 	blazefetch [OPTIONS]\n"
     	Options:
-    	  -d, --daemon      Run as a daemon (required)
-		  -g, --get <INFO>  Get and display specific information (e.g., OS, GPU)
-          -c, --clear       Clears the stored cache from memory
-          -v, --version     Show version information
-          -h, --help        Show this help message
+			-d, --daemon      Run as a daemon (required)
+			-g, --get <INFO>  Get and display specific information (e.g., OS, GPU)
+			-c, --clear       Clears the stored cache from memory
+			-v, --version     Show version information
+			-h, --help        Show this help message
 
 # License
 Blazefetch is licensed under the MIT license.  
