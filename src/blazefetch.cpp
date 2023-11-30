@@ -739,9 +739,9 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
             std::cout << getPackageInfo() << std::endl;
         } else if (info == "KERNEL") {
             std::cout << getKernelInfo() << std::endl;
-        } else if (info == "UPTIME") {
-            std::cout << getTimeInfo() << std::endl;
         } else if (info == "TIME") {
+            std::cout << getTimeInfo() << std::endl;
+        } else if (info == "UPTIME") {
             std::cout << getUptimeInfo() << std::endl;
         } else if (info == "SHELL") {
             std::cout << getShellInfo() << std::endl;
