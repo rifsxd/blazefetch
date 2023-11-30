@@ -29,7 +29,7 @@ sudo make clean install_iconic
 ```  
 
 # Usage
-	blazefetch [OPTIONS]\n"
+	blazefetch [OPTIONS]"
     	Options:
 			-d, --daemon      Run as a daemon (required)
 			-g, --get <INFO>  Get and display specific information (e.g., OS, GPU)
