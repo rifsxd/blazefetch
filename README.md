@@ -29,7 +29,13 @@ sudo make clean install_iconic
 ```  
 
 # Usage
-Run `blazefetch` with `-d` or `--daemon`  flag to initialize the daemon process once then run `blazefetch` again to get the fetch info working, if you kill the blaze daemon then blazefetch wont work. Also `-v` or `--version` to get version info or just `-h` or `--help` for more deatiled help.
+	blazefetch [OPTIONS]\n"
+    	Options:
+    	  -d, --daemon      Run as a daemon (required)
+		  -g, --get <INFO>  Get and display specific information (e.g., OS, GPU)
+          -c, --clear       Clears the stored cache from memory
+          -v, --version     Show version information
+          -h, --help        Show this help message
 
 # License
 Blazefetch is licensed under the MIT license.  

@@ -11,7 +11,6 @@
 #include <dirent.h>
 #include <unordered_map>
 
-
 #include <sys/shm.h>
 #include <sys/utsname.h>
 #include <sys/statvfs.h>
@@ -24,7 +23,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.2.2-BETA"
+#define VERSION "2.3.0-BETA"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
@@ -614,6 +613,25 @@ void removeSharedMemory(int shmid) {
     }
 }
 
+void clearStoredMemory() {
+    // Create a key for shared memory
+    key_t key = ftok("/tmp", 'R');
+
+    // Get the shared memory segment
+    int shmid = shmget(key, 1024, 0644);
+
+    // Attach the shared memory segment
+    char *shm = (char *)shmat(shmid, (void *)0, 0);
+
+    // Clear the shared memory content
+    memset(shm, 0, SHM_SIZE);
+
+    // Detach the shared memory segment
+    shmdt(shm);
+
+    std::cout << "\nStored blaze memory has been cleared.\n" << std::endl;
+}
+
 void runDaemon() {
     // Set up signal handling
     signal(SIGTERM, signalHandler);
@@ -704,10 +722,11 @@ void runProgram() {
 void printHelp() {
     std::cout << "\nUsage: blazefetch [OPTIONS]\n"
               << "Options:\n"
-              << "  -g, --get INFO    Get and display specific information (e.g., OS, GPU)\n"
               << "  -d, --daemon      Run as a daemon\n"
+              << "  -g, --get <INFO>  Get and display specific information (e.g., OS, GPU)\n"
+              << "  -c, --clear       Clears the stored cache from memory\n"
               << "  -v, --version     Show version information\n"
-              << "  -h, --help        Show this help message\n";
+              << "  -h, --help        Show this help message\n\n";
 }
 
 void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
@@ -748,14 +767,19 @@ const struct option longOptions[] = {
     {"daemon", no_argument, NULL, 'd'},
     {"version", no_argument, NULL, 'v'},
     {"get", required_argument, NULL, 'g'},
+    {"clear", no_argument, NULL, 'c'},
     {"help", no_argument, NULL, 'h'},
     {NULL, 0, NULL, 0} // End of the array
 };
+
+void getInfoAndPrint(const std::vector<std::string>& infoTypes);
 
 int main(int argc, char *argv[]) {
     // Declare the missing identifiers
     int runDaemonFlag = 0;
     int showVersionFlag = 0;
+    int clearMemoryFlag = 0;
+    int showHelpFlag = 0;
 
     // Check for flags
     for (int i = 1; i < argc; i++) {
@@ -763,13 +787,16 @@ int main(int argc, char *argv[]) {
             runDaemonFlag = 1;
         } else if (std::strcmp(argv[i], "-v") == 0 || std::strcmp(argv[i], "--version") == 0) {
             showVersionFlag = 1;
+        } else if (std::strcmp(argv[i], "-c") == 0 || std::strcmp(argv[i], "--clear") == 0) {
+            clearMemoryFlag = 1;
         } else if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
-            printHelp();
+            showHelpFlag = 1;
+        } else if (std::strcmp(argv[i], "-g") == 0 || std::strcmp(argv[i], "--get") == 0) {
         }
     }
 
     // Check if the daemon is already running (excluding -v and --daemon flags)
-    if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showVersionFlag) {
+    if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showVersionFlag == !clearMemoryFlag == !showHelpFlag) {
         std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
     }
@@ -779,7 +806,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> getInfoTypes;
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "dg:vh", longOptions, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "dg:vhc", longOptions, NULL)) != -1) {
         switch (opt) {
             case 'd':
                 runDaemonFlag = 1;
@@ -791,10 +818,13 @@ int main(int argc, char *argv[]) {
                 showVersionFlag = 1;
                 break;
             case 'h':
-                printHelp();
-                return 0;
+                showHelpFlag = 1;
+                break;
+            case 'c':
+                clearMemoryFlag = 1;
+                break;
             default:
-                printHelp();
+                showHelpFlag = 1;
                 return 1;
         }
     }
@@ -816,8 +846,12 @@ int main(int argc, char *argv[]) {
 
     if (runDaemonFlag) {
         runDaemon();
-    } else if (!getInfoTypes.empty()) {
-        getInfoAndPrint(getInfoTypes);
+    } else if (showVersionFlag) {
+        std::cout << "Blazefetch version " << VERSION << std::endl;
+    } else if (clearMemoryFlag) {
+        clearStoredMemory();
+    } else if (showHelpFlag) {
+        printHelp();
     } else {
         runProgram();
     }
