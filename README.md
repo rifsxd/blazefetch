@@ -31,6 +31,7 @@ sudo make clean install_iconic
     	Options:
 			-d, --daemon      Run as a daemon (required)
 			-g, --get <INFO>  Get and display specific information (e.g., OS, GPU)
+			-l, --live		  Launch live fetch instance
 			-c, --clear       Clears the stored cache from memory
 			-v, --version     Show version information
 			-h, --help        Show this help message

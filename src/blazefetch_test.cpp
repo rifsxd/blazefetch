@@ -752,6 +752,7 @@ void printHelp() {
               << "Options:\n"
               << "  -d, --daemon      Run as a daemon\n"
               << "  -g, --get <INFO>  Get and display specific information (e.g., OS, GPU)\n"
+              << "  -l, --live		  Launch live fetch instance\n"
               << "  -c, --clear       Clears the stored cache from memory\n"
               << "  -v, --version     Show version information\n"
               << "  -h, --help        Show this help message\n\n";
