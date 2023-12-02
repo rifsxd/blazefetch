@@ -10,6 +10,7 @@
 #include <vector>
 #include <dirent.h>
 #include <unordered_map>
+#include <termios.h>
 
 #include <sys/shm.h>
 #include <sys/utsname.h>
@@ -23,7 +24,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.4.1"
+#define VERSION "2.5.0-BETA"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
@@ -73,6 +74,8 @@
 #define MEDIA "MEDIA:"
 */
 #endif
+
+bool liveMode = false;
 
 // -------------------------------------------------------------- Info Func Start Point -------------------------------------------------------------- //
 
@@ -421,7 +424,7 @@ std::string getGpuInfo() {
 
 std::string getMediaInfo() {
     // You may need to replace this command with the one suitable for your media player
-    FILE *mediaInfoFile = popen("playerctl metadata --format '{{artist}} - {{title}}'", "r");
+    FILE *mediaInfoFile = popen("playerctl metadata --format '{{artist}} - {{title}}' 2>/dev/null", "r");
 
     if (mediaInfoFile) {
         char buffer[256];
@@ -509,7 +512,7 @@ std::string getTimeInfo() {
     return "\033[96m" + std::string(TIME) + " \033[0m" + std::string(timeBuffer);
 }
 
-/* ENABLE IF YOU NEED IT - ALSO ENABLE IN LINES 706 & 786
+/* ENABLE IF YOU NEED IT - ALSO ENABLE IN LINES 706 & 786 */
 
 std::string getTerminalInfo() {
     char* term = getenv("TERM");
@@ -527,7 +530,8 @@ std::string getTerminalInfo() {
         return "\033[35m" + std::string(TERM) + " \033[0mUnknown... \033[35mTerminal information not available?!\033[0m";
     }
 }
-*/
+
+/**/
 
 // -------------------------------------------------------------- Info Func End Point -------------------------------------------------------------- //
 
@@ -703,7 +707,7 @@ void runDaemon() {
         std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getTimeInfo() + "\n" + getShellInfo() + "\n" +
                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
-                            getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() /* + getTerminalInfo() */ + "\n\n"; // ENABLE getTerminalInfo()
+                            getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() /**/ + "\n" + getTerminalInfo() /**/ + "\n\n"; // ENABLE getTerminalInfo()
 
         // Update shared memory
         std::strcpy(shm, output.c_str());
@@ -783,8 +787,8 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
             std::cout << getMediaInfo() << std::endl;
         } else if (info == "NETWORK") {
             std::cout << getNetworkStatusInfo() << std::endl;
-        /* } else if (info == "TERM") {  // ENABLE TERM
-            std::cout << getTerminalInfo() << std::endl; */
+        /**/ } else if (info == "TERM") {  // ENABLE TERM
+            std::cout << getTerminalInfo() << std::endl; /**/
         } else {
             std::cerr << "Invalid information type: " << info << std::endl;
         }
@@ -802,12 +806,85 @@ const struct option longOptions[] = {
 
 void getInfoAndPrint(const std::vector<std::string>& infoTypes);
 
+// Function to check if a key is pressed
+bool isKeyPressed() {
+    struct termios oldt, newt;
+    int ch;
+    int oldf;
+
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+    ch = getchar();
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+    if(ch != EOF) {
+        ungetc(ch, stdin);
+        return true;
+    }
+
+    return false;
+}
+
+void runLiveProgram() {
+    // Create a key for shared memory
+    key_t key = ftok("/tmp", 'R');
+
+    // Get the shared memory segment
+    int shmid = shmget(key, 1024, 0644);
+
+    // Attach the shared memory segment
+    char *shm = (char *)shmat(shmid, (void *)0, 0);
+
+    // Enable live mode
+    liveMode = true;
+
+    // Run the live program loop
+    while (liveMode) {
+        // Check for key press to exit
+        if (isKeyPressed()) {
+            char key = getchar();
+            if (key == 'q' || key == 'Q') {
+                liveMode = false;
+                break;
+            }
+        }
+        
+        // Clear shared memory content
+        memset(shm, 0, SHM_SIZE);
+
+        // Run get<example>Info functions and store the output in shared memory
+        std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getPackageInfo() + "\n" +
+                              getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getTimeInfo() + "\n" + getShellInfo() + "\n" +
+                              getCpuInfo() + "\n" + getGpuInfo() + "\n" + getStorageInfo() + "\n" +
+                              getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() /**/ + "\n" + getTerminalInfo() /**/ + "\n\n"; // ENABLE getTerminalInfo()
+
+        // Update shared memory
+        std::strcpy(shm, output.c_str());
+
+        // Print cached info
+        std::cout << "\n" << shm;
+        
+        colorPallate();
+    }
+
+    // Detach the shared memory segment
+    shmdt(shm);
+}
+
 int main(int argc, char *argv[]) {
     // Declare the missing identifiers
     int runDaemonFlag = 0;
     int showVersionFlag = 0;
     int clearMemoryFlag = 0;
     int showHelpFlag = 0;
+    int showLiveFlag = 0;
 
     // Check for flags
     for (int i = 1; i < argc; i++) {
@@ -817,13 +894,15 @@ int main(int argc, char *argv[]) {
             showVersionFlag = 1;
         } else if (std::strcmp(argv[i], "-c") == 0 || std::strcmp(argv[i], "--clear") == 0) {
             clearMemoryFlag = 1;
+        } else if (std::strcmp(argv[i], "-l") == 0 || std::strcmp(argv[i], "--live") == 0) {
+            showLiveFlag = 1;
         } else if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
             showHelpFlag = 1;
         }
     }
 
     // Check if the daemon is already running (excluding -v and --daemon flags)
-    if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showVersionFlag == !clearMemoryFlag == !showHelpFlag) {
+    if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showVersionFlag == !clearMemoryFlag == !showHelpFlag == !showLiveFlag) {
         std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
     }
@@ -833,13 +912,16 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> getInfoTypes;
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "dg:vhc", longOptions, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "dgl:vhc", longOptions, NULL)) != -1) {
         switch (opt) {
             case 'd':
                 runDaemonFlag = 1;
                 break;
             case 'g':
                 getInfoTypes.push_back(optarg);
+                break;
+            case 'l':
+                showLiveFlag = 1;
                 break;
             case 'v':
                 showVersionFlag = 1;
@@ -877,6 +959,8 @@ int main(int argc, char *argv[]) {
         std::cout << "Blazefetch version " << VERSION << std::endl;
     } else if (clearMemoryFlag) {
         clearStoredMemory();
+    } else if (showLiveFlag) {
+        runLiveProgram();
     } else if (!getInfoTypes.empty()) {
         getInfoAndPrint(getInfoTypes);
     } else if (showHelpFlag) {

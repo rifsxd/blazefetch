@@ -424,7 +424,7 @@ std::string getGpuInfo() {
 
 std::string getMediaInfo() {
     // You may need to replace this command with the one suitable for your media player
-    FILE *mediaInfoFile = popen("playerctl metadata --format '{{artist}} - {{title}}'", "r");
+    FILE *mediaInfoFile = popen("playerctl metadata --format '{{artist}} - {{title}}' 2>/dev/null", "r");
 
     if (mediaInfoFile) {
         char buffer[256];
