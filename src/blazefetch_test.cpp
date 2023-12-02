@@ -871,9 +871,6 @@ void runLiveProgram() {
         std::cout << "\n" << shm;
         
         colorPallate();
-
-        // Sleep for 1 seconds
-        sleep(1);
     }
 
     // Detach the shared memory segment
@@ -886,27 +883,7 @@ int main(int argc, char *argv[]) {
     int showVersionFlag = 0;
     int clearMemoryFlag = 0;
     int showHelpFlag = 0;
-
-    // Options for live mode
-    static struct option live_options[] = {
-        {"live", no_argument, 0, 'l'},
-        {0, 0, 0, 0}
-    };
-
-    int live_option_index = 0;
-    int live_option;
-
-    // Parse options for live mode
-    while ((live_option = getopt_long(argc, argv, "l", live_options, &live_option_index)) != -1) {
-        switch (live_option) {
-            case 'l':
-                runLiveProgram();
-                break;
-            default:
-                printHelp();
-                exit(EXIT_FAILURE);
-        }
-    }
+    int showLiveFlag = 0;
 
     // Check for flags
     for (int i = 1; i < argc; i++) {
@@ -916,13 +893,15 @@ int main(int argc, char *argv[]) {
             showVersionFlag = 1;
         } else if (std::strcmp(argv[i], "-c") == 0 || std::strcmp(argv[i], "--clear") == 0) {
             clearMemoryFlag = 1;
+        } else if (std::strcmp(argv[i], "-l") == 0 || std::strcmp(argv[i], "--live") == 0) {
+            showLiveFlag = 1;
         } else if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
             showHelpFlag = 1;
         }
     }
 
     // Check if the daemon is already running (excluding -v and --daemon flags)
-    if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showVersionFlag == !clearMemoryFlag == !showHelpFlag) {
+    if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showVersionFlag == !clearMemoryFlag == !showHelpFlag == !showLiveFlag) {
         std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
     }
@@ -932,13 +911,16 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> getInfoTypes;
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "dg:vhc", longOptions, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "dgl:vhc", longOptions, NULL)) != -1) {
         switch (opt) {
             case 'd':
                 runDaemonFlag = 1;
                 break;
             case 'g':
                 getInfoTypes.push_back(optarg);
+                break;
+            case 'l':
+                showLiveFlag = 1;
                 break;
             case 'v':
                 showVersionFlag = 1;
@@ -976,6 +958,8 @@ int main(int argc, char *argv[]) {
         std::cout << "Blazefetch version " << VERSION << std::endl;
     } else if (clearMemoryFlag) {
         clearStoredMemory();
+    } else if (showLiveFlag) {
+        runLiveProgram();
     } else if (!getInfoTypes.empty()) {
         getInfoAndPrint(getInfoTypes);
     } else if (showHelpFlag) {
