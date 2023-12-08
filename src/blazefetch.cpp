@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <termios.h>
 
+#include <sys/wait.h>
 #include <sys/shm.h>
 #include <sys/utsname.h>
 #include <sys/statvfs.h>
@@ -24,9 +25,11 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.5.0-BETA"
+#define VERSION "2.6.0"
 #define SHM_SIZE 4096
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
+
+const char* PROCESS_NAME = "blazefetch";
 
 #ifdef ICONIC
 #define OS "󰍹"
@@ -660,6 +663,34 @@ void clearStoredMemory() {
     std::cout << "\nStored blaze memory has been cleared.\n" << std::endl;
 }
 
+// Function to send SIGTERM signal to the blazefetch process
+void killBlazefetchProcess() {
+    pid_t pid = -1;
+
+    // Use system command to find the blazefetch process ID
+    std::string cmd = "pgrep -o " + std::string(PROCESS_NAME);
+    FILE* processCmd = popen(cmd.c_str(), "r");
+
+    if (processCmd != nullptr) {
+        fscanf(processCmd, "%d", &pid);
+        pclose(processCmd);
+    }
+
+    // Check if the process ID is valid and kill the process
+    if (pid > 0) {
+        if (kill(pid, SIGTERM) == 0) {
+            std::cout << "\nTerminated " << PROCESS_NAME << " process...\n" << std::endl;
+            // Optionally wait for the process to exit
+            waitpid(pid, nullptr, 0);
+        } else {
+            perror("kill");
+            std::cerr << "\nFailed to terminate " << PROCESS_NAME << " process.\n" << std::endl;
+        }
+    } else {
+        std::cerr << "\n" << PROCESS_NAME << " process not found.\n" << std::endl;
+    }
+}
+
 void runDaemon() {
     // Set up signal handling
     signal(SIGTERM, signalHandler);
@@ -754,7 +785,9 @@ void printHelp() {
               << "  -g, --get <INFO>  Get and display specific information (e.g., OS, GPU)\n"
               << "  -l, --live		  Launch live fetch instance\n"
               << "  -c, --clear       Clears the stored cache from memory\n"
+              << "  -r, --remove      Removes the lock file incase if somethign went wrong\n"
               << "  -v, --version     Show version information\n"
+              << "  -k, --kill        Kill the daemon process\n"
               << "  -h, --help        Show this help message\n\n";
 }
 
@@ -801,7 +834,9 @@ const struct option longOptions[] = {
     {"version", no_argument, NULL, 'v'},
     {"get", required_argument, NULL, 'g'},
     {"clear", no_argument, NULL, 'c'},
+    {"remove", no_argument, NULL, 'r'},
     {"help", no_argument, NULL, 'h'},
+    {"kill", no_argument, NULL, 'k'},
     {NULL, 0, NULL, 0} // End of the array
 };
 
@@ -884,8 +919,10 @@ int main(int argc, char *argv[]) {
     int runDaemonFlag = 0;
     int showVersionFlag = 0;
     int clearMemoryFlag = 0;
+    int removeLockFlag = 0;
     int showHelpFlag = 0;
     int showLiveFlag = 0;
+    int killDaemonFlag = 0;
 
     // Check for flags
     for (int i = 1; i < argc; i++) {
@@ -899,11 +936,16 @@ int main(int argc, char *argv[]) {
             showLiveFlag = 1;
         } else if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
             showHelpFlag = 1;
+        } else if (std::strcmp(argv[i], "-k") == 0 || std::strcmp(argv[i], "--kill") == 0) {
+            killDaemonFlag = 1;
+        } else if ((std::strcmp(argv[i], "-r") == 0 || std::strcmp(argv[i], "--remove") == 0) && access(LOCK_FILE_PATH, F_OK) == -1) {
+            std::cerr << "\nNo lock file found. Nothing to remove.\n" << std::endl;
+            return EXIT_FAILURE;
         }
     }
 
-    // Check if the daemon is already running (excluding -v and --daemon flags)
-    if (!runDaemonFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showVersionFlag == !clearMemoryFlag == !showHelpFlag == !showLiveFlag) {
+    // Check if the daemon is already running (excluding -v, -c, -h, --remove, and --daemon flags)
+    if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !killDaemonFlag) {
         std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
     }
@@ -913,7 +955,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> getInfoTypes;
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "dgl:vhc", longOptions, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "dgl:vhcrk", longOptions, NULL)) != -1) {
         switch (opt) {
             case 'd':
                 runDaemonFlag = 1;
@@ -933,6 +975,12 @@ int main(int argc, char *argv[]) {
             case 'c':
                 clearMemoryFlag = 1;
                 break;
+            case 'r':
+                removeLockFlag = 1;
+                break;
+            case 'k':
+                killDaemonFlag = 1;
+                break;
             default:
                 showHelpFlag = 1;
                 break;
@@ -944,6 +992,22 @@ int main(int argc, char *argv[]) {
         std::cout << "Copyright\u00A9 2023 RifsxD" << std::endl;
         std::cout << "Blazefetch is a MIT licensed project\n" << std::endl;
         return 0;
+    }
+
+    if (removeLockFlag) {
+        // Check if the lock file exists before attempting to remove it
+        if (access(LOCK_FILE_PATH, F_OK) == -1) {
+            std::cerr << "\nNo lock file found. Nothing to remove.\n" << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        // Remove the lock file before exiting
+        if (unlink(LOCK_FILE_PATH) == -1) {
+            perror("unlink");
+            exit(EXIT_FAILURE);
+        }
+        std::cout << "\nLock file removed successfully.\n" << std::endl;
+        return EXIT_SUCCESS;
     }
 
     srand(static_cast<unsigned int>(time(nullptr)));
@@ -966,6 +1030,8 @@ int main(int argc, char *argv[]) {
         getInfoAndPrint(getInfoTypes);
     } else if (showHelpFlag) {
         printHelp();
+    } else if (killDaemonFlag) {
+        killBlazefetchProcess();
     } else {
         runProgram();
     }

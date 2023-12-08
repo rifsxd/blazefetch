@@ -71,6 +71,7 @@
         "stop_token": "cpp",
         "thread": "cpp",
         "stdfloat": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "any": "cpp"
     }
 }
