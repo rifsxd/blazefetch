@@ -25,8 +25,8 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.6.0"
-#define SHM_SIZE 4096
+#define VERSION "2.6.4"
+#define SHM_SIZE 1024
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
 const char* PROCESS_NAME = "blazefetch";
@@ -612,12 +612,35 @@ void daemonize() {
     open("/dev/null", O_RDWR); // stderr
 }
 
-int createSharedMemory() {
-    int shmid = shmget(IPC_PRIVATE, SHM_SIZE, IPC_CREAT | 0666);
+int getExistingSharedMemory() {
+    // Create a key for shared memory
+    key_t key = ftok("/tmp", 'R');
+
+    // Try to get the existing shared memory segment
+    int shmid = shmget(key, 1024, 0644 | IPC_CREAT);
+
     if (shmid == -1) {
         perror("shmget");
-        exit(EXIT_FAILURE);
+        // Return -1 to indicate that the shared memory doesn't exist
+        return -1;
     }
+
+    return shmid;
+}
+
+int createSharedMemory() {
+    // Attempt to get existing shared memory
+    int shmid = getExistingSharedMemory();
+
+    // If shared memory doesn't exist, create a new one
+    if (shmid == -1) {
+        shmid = shmget(IPC_PRIVATE, SHM_SIZE, IPC_CREAT | 0644);
+        if (shmid == -1) {
+            perror("shmget");
+            exit(EXIT_FAILURE);
+        }
+    }
+
     return shmid;
 }
 
@@ -832,6 +855,7 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
 const struct option longOptions[] = {
     {"daemon", no_argument, NULL, 'd'},
     {"version", no_argument, NULL, 'v'},
+    {"live", no_argument, NULL, 'l'},
     {"get", required_argument, NULL, 'g'},
     {"clear", no_argument, NULL, 'c'},
     {"remove", no_argument, NULL, 'r'},
@@ -955,7 +979,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> getInfoTypes;
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "dgl:vhcrk", longOptions, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "dg:lvhcrk", longOptions, NULL)) != -1) {
         switch (opt) {
             case 'd':
                 runDaemonFlag = 1;
