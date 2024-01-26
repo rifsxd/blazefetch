@@ -25,7 +25,7 @@ std::string getRamInfo() {
 
         if (total_mem > 0 && free_mem > 0) {
             long used_mem = total_mem - free_mem - buffers - cached;
-            return "\033[38;5;198m" + std::string(RAM) + " \033[0m" + std::to_string(used_mem / 1024) + " MB / " + std::to_string(total_mem / 1024) + " MB";
+            return "\033[38;5;198m" + std::string(RAM) + " \033[0m" + std::to_string(used_mem / 1024) + "MB / " + std::to_string(total_mem / 1024) + "MB";
         } else {
             return "\033[38;5;198m" + std::string(RAM) + " \033[0mUnknown";
         }

@@ -10,7 +10,7 @@ std::string getUptimeInfo() {
         int hours = static_cast<int>(uptimeValue / 3600);
         int minutes = static_cast<int>((uptimeValue - hours * 3600) / 60);
 
-        return "\033[36m" + std::string(UPTIME) + " \033[0m" + std::to_string(hours) + "h " + std::to_string(minutes) + "m";
+        return "\033[36m" + std::string(UPTIME) + " \033[0m" + std::to_string(hours) + "H " + std::to_string(minutes) + "M";
     } else {
         return "\033[36m" + std::string(UPTIME) + " \033[0mUnknown";
     }

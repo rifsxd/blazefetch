@@ -11,6 +11,9 @@
 #include <dirent.h>
 #include <unordered_map>
 #include <termios.h>
+#include <algorithm>
+#include <sstream>
+#include <iomanip>
 
 #include <sys/wait.h>
 #include <sys/shm.h>

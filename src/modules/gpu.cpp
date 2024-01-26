@@ -42,6 +42,28 @@ std::string xGpuInfoHelper(const char *str) {
     return result.empty() ? "Unknown" : result;
 }
 
+std::string getVramInfo() {
+    FILE* pipe = popen("glxinfo | grep 'Video memory' | awk '{print $3}'", "r");
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
+
+    const int bufferSize = 256; // Adjust the buffer size based on expected output size
+    char buffer[bufferSize];
+    std::string result = "";
+
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        result += buffer;
+    }
+
+    // Remove newline characters from the result
+    result.erase(std::remove(result.begin(), result.end(), '\n'), result.end());
+
+    pclose(pipe);
+
+    return result.empty() ? "Unknown" : result;
+}
+
 std::string getGpuInfo() {
     // FILE *lspci = popen("echo '01:00.0 VGA compatible controller: NVIDIA Corporation GP104 [GeForce GTX 1080] (rev a1)'", "r"); // Debugging NVIDIA GPU
     // FILE *lspci = popen("echo '00:02.0 VGA compatible controller: Intel Corporation HD Graphics 620 (rev 02)'", "r"); // Debugging Intel GPU
@@ -69,6 +91,8 @@ std::string getGpuInfo() {
                 } else {
                     vendor = "Unknown";
                 }
+
+                std::string vraminfo = getVramInfo();
 
                 // Extract content inside square brackets []
                 std::string gpuDetails = xGpuInfoHelper(gpuName);
@@ -105,11 +129,11 @@ std::string getGpuInfo() {
                     }
 
                     pclose(lspci);
-                    return "\033[96m" + std::string(GPU) + " \033[0m" + vendor + " " + gpuDetailsIntel;
+                    return "\033[96m" + std::string(GPU) + " \033[0m" + vendor + " " + gpuDetailsIntel + " " + "(" + vraminfo + ")";
                 }
 
                 pclose(lspci);
-                return "\033[96m" + std::string(GPU) + " \033[0m" + vendor + " " + gpuDetails;
+                return "\033[96m" + std::string(GPU) + " \033[0m" + vendor + " " + gpuDetails + " " + "(" + vraminfo + ")";
             } else {
                 pclose(lspci);
                 return "\033[96m" + std::string(GPU) + " \033[0mUnknown";
