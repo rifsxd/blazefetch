@@ -1,0 +1,13 @@
+#include "defines.cpp"
+
+const struct option longOptions[] = {
+    {"daemon", no_argument, NULL, 'd'},
+    {"version", no_argument, NULL, 'v'},
+    {"live", no_argument, NULL, 'l'},
+    {"get", required_argument, NULL, 'g'},
+    {"clear", no_argument, NULL, 'c'},
+    {"remove", no_argument, NULL, 'r'},
+    {"help", no_argument, NULL, 'h'},
+    {"kill", no_argument, NULL, 'k'},
+    {NULL, 0, NULL, 0} // End of the array
+};

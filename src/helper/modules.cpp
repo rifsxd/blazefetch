@@ -1,0 +1,17 @@
+#pragma once
+
+#include "../modules/title.cpp"
+#include "../modules/os.cpp"
+#include "../modules/kernel.cpp"
+#include "../modules/shell.cpp"
+#include "../modules/de.cpp"
+#include "../modules/uptime.cpp"
+#include "../modules/ram.cpp"
+#include "../modules/storage.cpp"
+#include "../modules/package.cpp"
+#include "../modules/cpu.cpp"
+#include "../modules/gpu.cpp"
+#include "../modules/media.cpp"
+#include "../modules/network.cpp"
+#include "../modules/time.cpp"
+#include "../modules/terminal.cpp"
