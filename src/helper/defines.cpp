@@ -45,7 +45,6 @@
 #define TERM ""
 #define TERM_PROG ""
 #else
-/*
 #define OS "󰍹 OS:"
 #define PACKAGES "󰏓 PACKAGES:"
 #define KERNEL "󰌽 KERNEL:"
@@ -61,7 +60,7 @@
 #define NETWORK "󰛳 NETWORK:"
 #define TERM " TERMINAL:"
 #define TERM_PROG " TERMINAL_PROGRAM:"
-*/
+/*
 #define OS "OS:"
 #define PACKAGES "PACKAGES:"
 #define KERNEL "KERNEL:"
@@ -77,5 +76,6 @@
 #define NETWORK "NETWORK:"
 #define TERM "TERMINAL:"
 #define TERM_PROG "TERMINAL_PROGRAM:"
+*/
 #endif
 
