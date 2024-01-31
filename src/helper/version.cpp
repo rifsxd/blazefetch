@@ -1,8 +1,7 @@
 #include "defines.cpp"
-#include <iostream>
-#include <unistd.h>
+#include "colors.cpp"
 
-#define VERSION "2.7.1"
+#define VERSION "2.7.2"
 #define BUILD_DATE __DATE__
 #define BUILD_TIME __TIME__
 
@@ -26,21 +25,38 @@ std::string getKernelVersion() {
         return "Unknown Kernel";
     }
 
-    char buffer[128];
+    char buffer[256];
     std::string result = "";
     while (!feof(pipe)) {
-        if (fgets(buffer, 128, pipe) != NULL)
+        if (fgets(buffer, 256, pipe) != NULL)
             result += buffer;
-            result.pop_back();
     }
+    
+    result.pop_back();
 
     pclose(pipe);
     return result;
 }
 
 int printVersion() {
-    std::cout << "\nBlazefetch version " << VERSION << " (" << BUILD_DATE << " | " << BUILD_TIME << " | " << getUserName() << "@" << getHostName() << " | " << getKernelVersion() << ")" << std::endl;
-    std::cout << "Copyright\u00A9 2024 RifsxD" << std::endl;
-    std::cout << "Blazefetch is a MIT licensed project\n" << std::endl;
+
+    std::cout << "\n";
+    std::cout << redColor << R"(
+ ▄▄▄▄    ██▓    ▄▄▄      ▒███████▒▓█████   █████▒▓█████▄▄▄█████▓ ▄████▄   ██░ ██ 
+▓█████▄ ▓██▒   ▒████▄    ▒ ▒ ▒ ▄▀░▓█   ▀ ▓██   ▒ ▓█   ▀▓  ██▒ ▓▒▒██▀ ▀█  ▓██░ ██▒
+▒██▒ ▄██▒██░   ▒██  ▀█▄  ░ ▒ ▄▀▒░ ▒███   ▒████ ░ ▒███  ▒ ▓██░ ▒░▒▓█    ▄ ▒██▀▀██░
+▒██░█▀  ▒██░   ░██▄▄▄▄██   ▄▀▒   ░▒▓█  ▄ ░▓█▒  ░ ▒▓█  ▄░ ▓██▓ ░ ▒▓▓▄ ▄██▒░▓█ ░██ 
+░▓█  ▀█▓░██████▒▓█   ▓██▒▒███████▒░▒████▒░▒█░    ░▒████▒ ▒██▒ ░ ▒ ▓███▀ ░░▓█▒░██▓
+░▒▓███▀▒░ ▒░▓  ░▒▒   ▓▒█░░▒▒ ▓░▒░▒░░ ▒░ ░ ▒ ░    ░░ ▒░ ░ ▒ ░░   ░ ░▒ ▒  ░ ▒ ░░▒░▒
+▒░▒   ░ ░ ░ ▒  ░ ▒   ▒▒ ░░░▒ ▒ ░ ▒ ░ ░  ░ ░       ░ ░  ░   ░      ░  ▒    ▒ ░▒░ ░
+ ░    ░   ░ ░    ░   ▒   ░ ░ ░ ░ ░   ░    ░ ░       ░    ░      ░         ░  ░░ ░
+ ░          ░  ░     ░  ░  ░ ░       ░  ░           ░  ░        ░ ░       ░  ░  ░
+      ░                  ░                                      ░                                                      
+)" << std::endl;
+
+    std::cout << greenColor << "Blazefetch version " << VERSION << " (" << BUILD_DATE << " | " << BUILD_TIME << " | " << getUserName() << "@" << getHostName() << " | " << getKernelVersion() << ")" << "\n" << std::endl;
+    std::cout << blueColor << "Copyright \u00A9 2024 RifsxD" << "\n" << std::endl;
+    std::cout << cyanColor << "Blazefetch is a MIT licensed project" << resetColor << "\n" << std::endl;
+
     return 0;
 }

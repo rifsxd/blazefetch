@@ -25,6 +25,32 @@ INSTALLPATH = ${DESTDIR}${PREFIX}/bin
 # Compiler
 CXX = g++
 
+# Build the project
+build:
+	mkdir build
+	$(CXX) -o build/$(BIN) $(SRC) $(FLAG)
+
+# Build the project with icons
+build_iconic:
+	mkdir build
+	$(CXX) -o build/$(BIN) $(SRC) $(ICONIC) $(FLAG)
+
+build_test:
+	mkdir build
+	$(CXX) -o build/$(BIN_TEST) $(SRC_TEST) $(FLAG)
+
+build_test_iconic:
+	mkdir build
+	$(CXX) -o build/$(BIN_TEST) $(SRC_TEST) $(ICONIC) $(FLAG)
+
+# Run the project
+run: build
+	./$(BIN)
+
+# Clean build files
+clean:
+	rm -rf build
+
 install : build
 
 	@echo "installing binary file to ${INSTALLPATH}/${BIN}"
@@ -54,28 +80,4 @@ install_test_iconic: build_test_iconic
 	@echo "installed"
 
 
-# Clean build files
-clean:
-	rm -rf build
 
-# Build the project
-build:
-	mkdir build
-	$(CXX) -o build/$(BIN) $(SRC) $(FLAG)
-
-# Build the project with icons
-build_iconic:
-	mkdir build
-	$(CXX) -o build/$(BIN) $(SRC) $(ICONIC) $(FLAG)
-
-build_test:
-	mkdir build
-	$(CXX) -o build/$(BIN_TEST) $(SRC_TEST) $(FLAG)
-
-build_test_iconic:
-	mkdir build
-	$(CXX) -o build/$(BIN_TEST) $(SRC_TEST) $(ICONIC) $(FLAG)
-
-# Run the project
-run: build
-	./$(BIN)

@@ -6,16 +6,17 @@
 #include "helper/get.cpp"
 #include "helper/options.cpp"
 #include "helper/version.cpp"
+#include "helper/run.cpp"
 
 int main(int argc, char *argv[]) {
     // Declare the missing identifiers
-    int runDaemonFlag = 0;
-    int showVersionFlag = 0;
-    int clearMemoryFlag = 0;
-    int removeLockFlag = 0;
-    int showHelpFlag = 0;
-    int showLiveFlag = 0;
-    int killDaemonFlag = 0;
+    int runDaemonFlag       = 0;
+    int showVersionFlag     = 0;
+    int clearMemoryFlag     = 0;
+    int removeLockFlag      = 0;
+    int showHelpFlag        = 0;
+    int showLiveFlag        = 0;
+    int killDaemonFlag      = 0;
 
     // Check for flags
     for (int i = 1; i < argc; i++) {

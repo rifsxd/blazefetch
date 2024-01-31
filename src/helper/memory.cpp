@@ -1,3 +1,5 @@
+#pragma once
+
 #include "defines.cpp"
 #define SHM_SIZE 1024
 
