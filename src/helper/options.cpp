@@ -4,6 +4,7 @@ const struct option longOptions[] = {
     {"daemon", no_argument, NULL, 'd'},
     {"version", no_argument, NULL, 'v'},
     {"live", no_argument, NULL, 'l'},
+    {"static", no_argument, NULL, 's'},
     {"get", required_argument, NULL, 'g'},
     {"clear", no_argument, NULL, 'c'},
     {"remove", no_argument, NULL, 'r'},

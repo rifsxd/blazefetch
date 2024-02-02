@@ -72,7 +72,10 @@
         "thread": "cpp",
         "stdfloat": "cpp",
         "valarray": "cpp",
-        "any": "cpp"
+        "any": "cpp",
+        "codecvt": "cpp",
+        "source_location": "cpp",
+        "future": "cpp"
     },
-    "cmake.sourceDirectory": "/run/media/LinuxStation-SSD/IDE/git/blazefetch/src"
+    "cmake.sourceDirectory": "/media/linuxstation/IDE/git/blazefetch/src"
 }

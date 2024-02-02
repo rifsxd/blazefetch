@@ -2,6 +2,7 @@
 #include "helper/memory.cpp"
 #include "helper/daemon.cpp"
 #include "helper/live.cpp"
+#include "helper/static.cpp"
 #include "helper/help.cpp"
 #include "helper/get.cpp"
 #include "helper/options.cpp"
@@ -17,6 +18,7 @@ int main(int argc, char *argv[]) {
     int showHelpFlag        = 0;
     int showLiveFlag        = 0;
     int killDaemonFlag      = 0;
+    int showStaticFlag      = 0;
 
     // Check for flags
     for (int i = 1; i < argc; i++) {
@@ -28,6 +30,8 @@ int main(int argc, char *argv[]) {
             clearMemoryFlag = 1;
         } else if (std::strcmp(argv[i], "-l") == 0 || std::strcmp(argv[i], "--live") == 0) {
             showLiveFlag = 1;
+        } else if (std::strcmp(argv[i], "-s") == 0 || std::strcmp(argv[i], "--static") == 0) {
+            showStaticFlag = 1;
         } else if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
             showHelpFlag = 1;
         } else if (std::strcmp(argv[i], "-k") == 0 || std::strcmp(argv[i], "--kill") == 0) {
@@ -39,7 +43,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Check if the daemon is already running (excluding -v, -c, -h, --remove, and --daemon flags)
-    if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !killDaemonFlag) {
+    if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !showStaticFlag && !killDaemonFlag) {
         std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
     }
@@ -49,7 +53,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> getInfoTypes;
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "dg:lvhcrk", longOptions, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "dg:lsvhcrk", longOptions, NULL)) != -1) {
         switch (opt) {
             case 'd':
                 runDaemonFlag = 1;
@@ -59,6 +63,9 @@ int main(int argc, char *argv[]) {
                 break;
             case 'l':
                 showLiveFlag = 1;
+                break;
+            case 's':
+                showStaticFlag = 1;
                 break;
             case 'v':
                 showVersionFlag = 1;
@@ -113,6 +120,8 @@ int main(int argc, char *argv[]) {
         clearStoredMemory();
     } else if (showLiveFlag) {
         runLiveProgram();
+    } else if (showStaticFlag) {
+        runStaticProgram();
     } else if (!getInfoTypes.empty()) {
         getInfoAndPrint(getInfoTypes);
     } else if (showHelpFlag) {
