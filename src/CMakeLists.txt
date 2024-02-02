@@ -36,3 +36,6 @@ add_executable(${BIN_TEST}_iconic ${SRC_TEST})
 target_compile_definitions(${BIN_TEST}_iconic PRIVATE ${ICONIC})
 target_link_libraries(${BIN_TEST}_iconic PRIVATE ${FLAG})
 set_target_properties(${BIN_TEST}_iconic PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# Install targets
+install(TARGETS ${BIN} ${BIN}_iconic ${BIN_TEST} ${BIN_TEST}_iconic DESTINATION /usr/local/bin)
