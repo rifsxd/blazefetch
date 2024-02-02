@@ -1,5 +1,18 @@
 #include "helper.cpp"
 
+bool isNMCLIAvailable() {
+    FILE *checkNMCLI = popen("command -v nmcli 2>/dev/null", "r");
+    if (checkNMCLI) {
+        char buffer[128];
+        if (fgets(buffer, sizeof(buffer), checkNMCLI) != nullptr) {
+            pclose(checkNMCLI);
+            return true;
+        }
+        pclose(checkNMCLI);
+    }
+    return false;
+}
+
 std::string runNetworkInfoCMD(const char* command) {
     char buffer[128];
     std::string result = "";
@@ -26,6 +39,10 @@ std::string runNetworkInfoCMD(const char* command) {
 }
 
 std::string getNetworkStatusInfo() {
+    if (!isNMCLIAvailable()) {
+        return "\033[94m" + std::string(NETWORK) + " \033[0mnmcli not found";
+    }
+
     std::string wiredInterfaceCommand = "ls /sys/class/net | grep -E '^enp[0-9]+s[0-9]+$'";
     std::string wirelessInterfaceCommand1 = "ls /sys/class/net | grep -E '^wlan[0-9]+$'";
     std::string wirelessInterfaceCommand2 = "ls /sys/class/net | grep -E '^wlp[0-9]+s[0-9]+$'";
