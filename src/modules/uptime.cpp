@@ -4,7 +4,11 @@ std::string getUptimeInfo() {
     FILE *uptimeFile = fopen("/proc/uptime", "r");
     if (uptimeFile) {
         double uptimeValue;
-        fscanf(uptimeFile, "%lf", &uptimeValue);
+        if (fscanf(uptimeFile, "%lf", &uptimeValue) != 1) {
+            // Handle fscanf error, e.g., print an error message or return a default value
+            fclose(uptimeFile);
+            return "\033[36m" + std::string(UPTIME) + " \033[0mError reading uptime";
+        }
         fclose(uptimeFile);
 
         int hours = static_cast<int>(uptimeValue / 3600);
