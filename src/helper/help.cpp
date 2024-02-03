@@ -8,6 +8,7 @@ void printHelp() {
               << greenColor     <<      "  -g, --get <INFO>  Get and display specific information (e.g., OS, GPU)\n"
               << greenColor     <<      "  -l, --live        Launch live fetch instance\n"
               << blueColor      <<      "  -s, --static      Show static fetch information\n"
+              << greenColor     <<      "  -a, --ascii       Show ascii art of your distro (can be used as tandem with -s, --static)\n"
               << orangeColor    <<      "  -c, --clear       Clears the stored cache from memory\n"
               << redColor       <<      "  -r, --remove      Removes the lock file incase if something went wrong\n"
               << purpleColor    <<      "  -v, --version     Show version information\n"

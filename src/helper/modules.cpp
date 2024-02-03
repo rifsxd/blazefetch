@@ -15,3 +15,4 @@
 #include "../modules/network.cpp"
 #include "../modules/time.cpp"
 #include "../modules/terminal.cpp"
+#include "../modules/glyph.cpp"

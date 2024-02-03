@@ -3,6 +3,7 @@
 #include "helper/daemon.cpp"
 #include "helper/live.cpp"
 #include "helper/static.cpp"
+#include "helper/ascii.cpp"
 #include "helper/help.cpp"
 #include "helper/get.cpp"
 #include "helper/options.cpp"
@@ -10,7 +11,7 @@
 #include "helper/run.cpp"
 
 int main(int argc, char *argv[]) {
-    // Declare the missing identifiers
+    // Declare the identifiers
     int runDaemonFlag       = 0;
     int showVersionFlag     = 0;
     int clearMemoryFlag     = 0;
@@ -19,6 +20,8 @@ int main(int argc, char *argv[]) {
     int showLiveFlag        = 0;
     int killDaemonFlag      = 0;
     int showStaticFlag      = 0;
+    int showASCIIFlag       = 0;
+    int showTandemFlags      = 0;
 
     // Check for flags
     for (int i = 1; i < argc; i++) {
@@ -32,6 +35,8 @@ int main(int argc, char *argv[]) {
             showLiveFlag = 1;
         } else if (std::strcmp(argv[i], "-s") == 0 || std::strcmp(argv[i], "--static") == 0) {
             showStaticFlag = 1;
+        } else if (std::strcmp(argv[i], "-a") == 0 || std::strcmp(argv[i], "--ascii") == 0) {
+            showASCIIFlag = 1;
         } else if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
             showHelpFlag = 1;
         } else if (std::strcmp(argv[i], "-k") == 0 || std::strcmp(argv[i], "--kill") == 0) {
@@ -42,8 +47,13 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // Check if both -s and -a flags are present
+    if (showStaticFlag && showASCIIFlag) {
+        showTandemFlags = 1;
+    }
+
     // Check if the daemon is already running (excluding -v, -c, -h, --remove, and --daemon flags)
-    if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !showStaticFlag && !killDaemonFlag) {
+    if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !showStaticFlag && !showASCIIFlag && !killDaemonFlag) {
         std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
     }
@@ -53,7 +63,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> getInfoTypes;
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "dg:lsvhcrk", longOptions, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "dg:lsavhcrk", longOptions, NULL)) != -1) {
         switch (opt) {
             case 'd':
                 runDaemonFlag = 1;
@@ -66,6 +76,9 @@ int main(int argc, char *argv[]) {
                 break;
             case 's':
                 showStaticFlag = 1;
+                break;
+            case 'a':
+                showASCIIFlag = 1;
                 break;
             case 'v':
                 showVersionFlag = 1;
@@ -120,8 +133,13 @@ int main(int argc, char *argv[]) {
         clearStoredMemory();
     } else if (showLiveFlag) {
         runLiveProgram();
+    } else if ((showStaticFlag || showTandemFlags) && (showASCIIFlag || showTandemFlags)) {
+        runASCIIProgram();
+        runStaticProgram();
     } else if (showStaticFlag) {
         runStaticProgram();
+    } else if (showASCIIFlag) {
+        runASCIIProgram();
     } else if (!getInfoTypes.empty()) {
         getInfoAndPrint(getInfoTypes);
     } else if (showHelpFlag) {
