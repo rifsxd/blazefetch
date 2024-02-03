@@ -5,9 +5,13 @@
 		⚡ This is blazefetch a simple and useful tool to get live fetch info through simple flags which will be very helpful for eww widgets and sys bar like polybars, waybars and such, it doesnt need any refresh or anything just keep the -g command in loop, run it at start with --d or daemon and you are good to go, its very minimal and lite which only takes 200-300 kb and 0.03% cpu every 1 sec (also taking suggestions on which other info should it fetch in the future) !!!THIS IS NOT YOUR AVERAGE FETCH SCRIPT!!!
 	</p><br>
 	<p><br> Default</p><br>
-	<img src="/assets/prev_default.png">
+	<img src="/assets/preview_default.png">
+	<p><br> Default With ASCII Art</p><br>
+	<img src="/assets/preview_default_ascii.png">
 	<p><br> Iconic</p><br>
-	<img src="/assets/prev_iconic.png">
+	<img src="/assets/preview_iconic.png">
+	<p><br> Iconic With ASCII Art</p><br>
+	<img src="/assets/preview_iconic_ascii.png">
 </div>
 
 # Install
@@ -28,12 +32,16 @@ sudo make clean install_iconic
 
 # Usage
 	blazefetch [OPTIONS]
-    	Options:
-			-d, --daemon      Run as a daemon (required)
-			-g, --get <INFO>  Get and display specific information (e.g., OS, GPU)
-			-l, --live		  Launch live fetch instance
-			-c, --clear       Clears the stored cache from memory
+		Options:
+			-d, --daemon      Run as a daemon
+			-g, --get <INFO>  Get and display specific information (e.g. OS, GPU)
+			-l, --live        Launch live fetch instance
+			-s, --static      Show static fetch information
+			-a, --ascii       Show ascii art of your distro (can be used as tandem with -s, --static)
+			-c, --clear       Clears the stored cache from memory\n"
+			-r, --remove      Removes the lock file incase if something went wrong
 			-v, --version     Show version information
+			-k, --kill        Kill the daemon process
 			-h, --help        Show this help message
 
 # License
