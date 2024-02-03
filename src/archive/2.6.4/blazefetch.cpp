@@ -25,7 +25,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
-#define VERSION "2.6.4-TESTING"
+#define VERSION "2.6.4"
 #define SHM_SIZE 1024
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 

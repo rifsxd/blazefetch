@@ -77,8 +77,18 @@ void killBlazefetchProcess() {
     FILE* processCmd = popen(cmd.c_str(), "r");
 
     if (processCmd != nullptr) {
-        fscanf(processCmd, "%d", &pid);
+        if (fscanf(processCmd, "%d", &pid) != 1) {
+            // Handle the case where fscanf fails to read the expected value
+            perror("fscanf");
+            std::cerr << "\nError reading process ID for " << PROCESS_NAME << ".\n" << std::endl;
+            pid = -1;  // Set pid to an invalid value
+        }
+
         pclose(processCmd);
+    } else {
+        // Handle the case where popen fails
+        perror("popen");
+        std::cerr << "\nError executing command to find " << PROCESS_NAME << " process.\n" << std::endl;
     }
 
     // Check if the process ID is valid and kill the process
