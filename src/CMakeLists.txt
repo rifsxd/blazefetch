@@ -16,11 +16,9 @@ endif()
 
 # Source files
 set(SRC blazefetch.cpp)
-set(SRC_TEST blazefetch_test.cpp)
 
 # Binary files
 set(BIN blazefetch)
-set(BIN_TEST blazefetch_test)
 
 # Flags
 set(FLAG -lX11)
