@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
+#include <cstdio>
+#include <memory>
 
 #include <sys/wait.h>
 #include <sys/shm.h>

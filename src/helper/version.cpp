@@ -1,7 +1,7 @@
 #include "defines.cpp"
 #include "colors.cpp"
 
-#define VERSION "2.7.9"
+#define VERSION "2.8.0"
 #define BUILD_DATE __DATE__
 #define BUILD_TIME __TIME__
 

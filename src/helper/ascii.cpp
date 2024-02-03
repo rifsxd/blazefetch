@@ -3,6 +3,8 @@
 #include "memory.cpp"
 
 void runASCIIProgram() {
+
+    std::string distroName = getDistoInfo();
     
     // Create a key for shared memory
     key_t key = ftok("/tmp", 'R');
@@ -17,7 +19,7 @@ void runASCIIProgram() {
     memset(shm, 0, SHM_SIZE);
 
     // Run and store other info in shared memory
-    std::string output = getGlyphInfo() + "\n";
+    std::string output = getGlyphInfo(distroName) + "\n";
 
     // Update shared memory
     std::strcpy(shm, output.c_str());
