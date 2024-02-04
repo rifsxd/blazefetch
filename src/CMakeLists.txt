@@ -5,15 +5,6 @@ project(blazefetch)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_COMPILER g++)
 
-# Set architecture flags
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    message(STATUS "64-bit architecture detected")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
-elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    message(STATUS "32-bit architecture detected")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-endif()
-
 # Source files
 set(SRC blazefetch.cpp)
 
