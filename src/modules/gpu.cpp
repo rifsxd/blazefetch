@@ -1,5 +1,18 @@
 #include "helper.cpp"
 
+bool isUtilsAvailable() {
+    FILE *checkNMCLI = popen("command -v glxinfo lspci 2>/dev/null", "r");
+    if (checkNMCLI) {
+        char buffer[128];
+        if (fgets(buffer, sizeof(buffer), checkNMCLI) != nullptr) {
+            pclose(checkNMCLI);
+            return true;
+        }
+        pclose(checkNMCLI);
+    }
+    return false;
+}
+
 std::string xGpuInfoHelper(const char *str) {
     std::string result;
     const char *start = strchr(str, '[');
@@ -65,6 +78,11 @@ std::string getVramInfo() {
 }
 
 std::string getGpuInfo() {
+
+    if (!isUtilsAvailable()) {
+        return "\033[94m" + std::string(GPU) + " \033[0m Utils (glxinfo & lspci) not found";
+    }
+
     // FILE *lspci = popen("echo '01:00.0 VGA compatible controller: NVIDIA Corporation GP104 [GeForce GTX 1080] (rev a1)'", "r"); // Debugging NVIDIA GPU
     // FILE *lspci = popen("echo '00:02.0 VGA compatible controller: Intel Corporation HD Graphics 620 (rev 02)'", "r"); // Debugging Intel GPU
     // FILE *lspci = popen("echo '0d:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Ellesmere [Radeon RX 590] (rev e7)'", "r"); // Debugging AMD GPU

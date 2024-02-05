@@ -31,6 +31,7 @@
 #include <X11/Xutil.h>
 
 #ifdef ICONIC
+#define ASCII ""
 #define OS "󰍹"
 #define PACKAGES "󰏓"
 #define KERNEL "󰌽"
@@ -47,6 +48,7 @@
 #define TERM ""
 #define TERM_PROG ""
 #else
+#define ASCII " ASCII:"
 #define OS "󰍹 OS:"
 #define PACKAGES "󰏓 PACKAGES:"
 #define KERNEL "󰌽 KERNEL:"
