@@ -32,14 +32,63 @@ std::string getDistoInfo() {
         }
 
         fclose(fp);
-        return "\033[0mUnknown";
+        return "Unknown";
     } else {
-        return "\033[0mUnknown";
+        return "Unknown";
     }
 }
 
+std::string generateAnsiColor(const char* colorValue) {
+    // Split RGB values
+    int r, g, b;
+    if (sscanf(colorValue, "38;2;%d;%d;%d", &r, &g, &b) == 3) {
+        // Convert RGB values to ANSI color escape code
+        return "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
+    } else {
+        // Return default color if parsing fails
+        return "Unknown";
+    }
+}
+
+std::string getDistroColorInfo() {
+    FILE *fp = fopen("/etc/os-release", "r");
+    if (fp) {
+        int foundAnsiColor = 0;
+        char line[256];
+        
+        while (fgets(line, sizeof(line), fp)) {
+            if (strstr(line, "ANSI_COLOR")) {
+                char *colorValue = strchr(line, '=') + 2;
+                colorValue[strlen(colorValue) - 2] = '\0';
+                
+                // Process colorValue and convert it to ANSI color escape code
+                std::string ansiColor = generateAnsiColor(colorValue);
+                
+                fclose(fp);
+                return ansiColor;
+            }
+        }
+
+        fclose(fp);
+        return "Unknown";  // Return default color if not found
+    } else {
+        return "Unknown";
+    }
+}
+
+std::string getDistroAnsiColor() {
+
+    std::string distroAnsiColor = getDistroColorInfo();
+
+    return distroAnsiColor;
+}
+
+
 std::string getDistroColor(const std::string& distroName) {
+
     char firstChar = distroName.empty() ? ' ' : std::toupper(distroName[0]);
+
+    
 
     switch (firstChar) {
         case 'A':
@@ -47,7 +96,7 @@ std::string getDistroColor(const std::string& distroName) {
         case 'B':
             return orangeColor;
         case 'C':
-            return blueColor;
+            return redColor;
         case 'D':
             return greenColor;
         case 'E':
@@ -109,16 +158,37 @@ std::string removeParentheses(const std::string& input) {
     return result;
 }
 
+std::string getConditionalDistroColor(const std::string& distroName) {
+
+    std::string distroAnsiColor = getDistroColorInfo();
+
+    // If distroAnsiColor is not empty, return its value
+    if (!distroAnsiColor.empty() && distroAnsiColor.find("Unknown")) {
+        return distroAnsiColor;
+    }
+
+    std::string cleanedDistroName = removeParentheses(distroName);
+
+    std::string distroColor = getDistroColor(cleanedDistroName);
+
+    // Otherwise, return the result of getDistroColor
+    return distroColor;
+}
+
+
 std::string getGlyphInfo(const std::string& distroName) {
 
     std::ofstream tempFontFile("temp_font.flf");
     tempFontFile << customFont;
     tempFontFile.close();
+
+    
     
     std::string cleanedDistroName = removeParentheses(distroName);
     std::string figletCommand = "figlet -f temp_font.flf \"" + cleanedDistroName + "\"";
+    std::string conditionalDistroColor = getConditionalDistroColor(distroName);
     std::string figletOutput = exec(figletCommand.c_str());
     std::remove("temp_font.flf");
     std::string distroColor = getDistroColor(cleanedDistroName);
-    return distroColor + figletOutput  + resetColor;
+    return conditionalDistroColor + figletOutput  + resetColor;
 }
