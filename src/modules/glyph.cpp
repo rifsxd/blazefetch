@@ -13,7 +13,7 @@ bool isFigletAvailable() {
     return false;
 }
 
-std::string exec(const char* cmd) {
+std::string execHelperGlyph(const char* cmd) {
     std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
     if (!pipe) {
         throw std::runtime_error("popen() failed!");
@@ -219,7 +219,7 @@ std::string getGlyphInfo(const std::string& distroName) {
     std::string cleanedDistroName = removeParentheses(distroName);
     std::string figletCommand = "figlet -f temp_font.flf \"" + cleanedDistroName + "\"";
     std::string conditionalDistroColor = getConditionalDistroColor(distroName);
-    std::string figletOutput = exec(figletCommand.c_str());
+    std::string figletOutput = execHelperGlyph(figletCommand.c_str());
     std::remove("temp_font.flf");
     std::string distroColor = getDistroColor(cleanedDistroName);
     return conditionalDistroColor + figletOutput  + resetColor;
