@@ -33,6 +33,7 @@
 #ifdef ICONIC
 #define ASCII ""
 #define OS "󰍹"
+#define HOST "󰒋"
 #define PACKAGES "󰏓"
 #define KERNEL "󰌽"
 #define UPTIME "󱘿"
@@ -40,6 +41,7 @@
 #define SHELL ""
 #define CPU ""
 #define GPU "󰿵"
+#define SCREEN "󰹑"
 #define DISK "󰋊"
 #define RAM "󰇻"
 #define DE "󰖲"
@@ -50,6 +52,7 @@
 #else
 #define ASCII " ASCII:"
 #define OS "󰍹 OS:"
+#define HOST "󰒋 HOST:"
 #define PACKAGES "󰏓 PACKAGES:"
 #define KERNEL "󰌽 KERNEL:"
 #define UPTIME "󱘿 UPTIME:"
@@ -57,6 +60,7 @@
 #define SHELL " SHELL:"
 #define CPU " CPU:"
 #define GPU "󰿵 GPU:"
+#define SCREEN "󰹑 SCREEN:"
 #define DISK "󰋊 DISK:"
 #define RAM "󰇻 RAM:"
 #define DE "󰖲 DE:"

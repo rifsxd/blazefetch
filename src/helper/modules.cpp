@@ -16,3 +16,5 @@
 #include "../modules/time.cpp"
 #include "../modules/terminal.cpp"
 #include "../modules/glyph.cpp"
+#include "../modules/screen.cpp"
+#include "../modules/host.cpp"
