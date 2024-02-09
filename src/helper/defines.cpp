@@ -29,9 +29,11 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/Xrandr.h>
 
 #ifdef ICONIC
 #define ASCII ""
+#define USER ""
 #define OS "󰍹"
 #define HOST "󰒋"
 #define PACKAGES "󰏓"
@@ -51,6 +53,7 @@
 #define TERM_PROG ""
 #else
 #define ASCII " ASCII:"
+#define USER " USER:"
 #define OS "󰍹 OS:"
 #define HOST "󰒋 HOST:"
 #define PACKAGES "󰏓 PACKAGES:"

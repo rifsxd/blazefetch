@@ -2,9 +2,12 @@
 #include "modules.cpp"
 
 void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
+    
+    std::string distroName = getDistroInfo();
+
     for (const auto& info : infoTypes) {
         if (info == "USER") {
-            std::cout << getTitleInfo() << std::endl;
+            std::cout << getTitleInfo(distroName) << std::endl;
         } else if (info == "OS") {
             std::cout << getOsInfo() << std::endl;
         } else if (info == "HOST") {

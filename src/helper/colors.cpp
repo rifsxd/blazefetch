@@ -29,3 +29,105 @@ void colorPallate() {
     std::cout << "\033[0m\n\n";
 
 }
+
+std::string generateAnsiColor(const char* colorValue) {
+    // Split RGB values
+    int r, g, b;
+    if (sscanf(colorValue, "38;2;%d;%d;%d", &r, &g, &b) == 3) {
+        // Convert RGB values to ANSI color escape code
+        return "\033[38;2;" + std::to_string(r) + ";" + std::to_string(g) + ";" + std::to_string(b) + "m";
+    } else {
+        // Return default color if parsing fails
+        return "Unknown";
+    }
+}
+
+std::string getDistroColorAnsiInfo() {
+    FILE *fp = fopen("/etc/os-release", "r");
+    if (fp) {
+        int foundAnsiColor = 0;
+        char line[256];
+        
+        while (fgets(line, sizeof(line), fp)) {
+            if (strstr(line, "ANSI_COLOR")) {
+                char *colorValue = strchr(line, '=') + 2;
+                colorValue[strlen(colorValue) - 2] = '\0';
+                
+                // Process colorValue and convert it to ANSI color escape code
+                std::string ansiColor = generateAnsiColor(colorValue);
+                
+                fclose(fp);
+                return ansiColor;
+            }
+        }
+
+        fclose(fp);
+        return "Unknown";  // Return default color if not found
+    } else {
+        return "Unknown";
+    }
+}
+
+std::string getDistroColorInfo(const std::string& distroName) {
+
+    char firstChar = distroName.empty() ? ' ' : std::toupper(distroName[0]);
+
+    
+
+    switch (firstChar) {
+        case 'A':
+            return redColor;
+        case 'B':
+            return orangeColor;
+        case 'C':
+            return redColor;
+        case 'D':
+            return greenColor;
+        case 'E':
+            return cyanColor;
+        case 'F':
+            return blueColor;
+        case 'G':
+            return purpleColor;
+        case 'H':
+            return pinkColor;
+        case 'I':
+            return brownColor;
+        case 'J':
+            return grayColor;
+        case 'K':
+            return lightBlueColor;
+        case 'L':
+            return lightGreenColor;
+        case 'M':
+            return redColor; 
+        case 'N':
+            return orangeColor; 
+        case 'O':
+            return yellowColor; 
+        case 'P':
+            return greenColor; 
+        case 'Q':
+            return cyanColor; 
+        case 'R':
+            return blueColor; 
+        case 'S':
+            return purpleColor; 
+        case 'T':
+            return pinkColor; 
+        case 'U':
+            return brownColor; 
+        case 'V':
+            return grayColor; 
+        case 'W':
+            return lightBlueColor; 
+        case 'X':
+            return lightGreenColor; 
+        case 'Y':
+            return redColor; 
+        case 'Z':
+            return orangeColor; 
+        default:
+            return resetColor; // Default to reset color if no match is found
+    }
+}

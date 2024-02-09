@@ -12,7 +12,7 @@ set(SRC blazefetch.cpp)
 set(BIN blazefetch)
 
 # Flags
-set(FLAG -lX11)
+set(FLAG -lX11 -lXrandr)
 set(ICONIC "-D ICONIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
 

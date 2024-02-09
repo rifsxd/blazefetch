@@ -107,6 +107,9 @@ void killBlazefetchProcess() {
 }
 
 void runDaemon() {
+
+    std::string distroName = getDistroInfo();
+    
     // Set up signal handling
     signal(SIGTERM, signalHandler);
     signal(SIGINT, signalHandler);
@@ -150,7 +153,7 @@ void runDaemon() {
         memset(shm, 0, SHM_SIZE);
 
         // Run get<example>Info functions and store the output in shared memory
-        std::string output = getTitleInfo() + "\n" + getOsInfo() + "\n" + getHostInfo() + "\n" + getPackageInfo() + "\n" +
+        std::string output = getTitleInfo(distroName) + "\n" + getOsInfo() + "\n" + getHostInfo() + "\n" + getPackageInfo() + "\n" +
                             getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getTimeInfo() + "\n" + getShellInfo() + "\n" +
                             getCpuInfo() + "\n" + getGpuInfo() + "\n" + getScreenResInfo() + "\n" + getStorageInfo() + "\n" +
                             getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getNetworkStatusInfo() + "\n" + getTerminalInfo() + "\n\n";

@@ -4,7 +4,7 @@
 
 void runASCIIProgram() {
 
-    std::string distroName = getDistoInfo();
+    std::string distroName = getDistroInfo();
     
     // Create a key for shared memory
     key_t key = ftok("/tmp", 'R');
