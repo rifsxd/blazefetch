@@ -40,7 +40,7 @@ std::string runNetworkInfoCMD(const char* command) {
 
 std::string getNetworkStatusInfo() {
     if (!isNMCLIAvailable()) {
-        return "\033[94m" + std::string(NETWORK) + " \033[0mnmcli not found";
+        return "\033[94m" + std::string(NETWORK) + " \033[0m'nmcli' not found";
     }
 
     std::string wiredInterfaceCommand = "ls /sys/class/net | grep -E '^enp[0-9]+s[0-9]+$'";

@@ -114,7 +114,7 @@ std::string getGlyphInfo(const std::string& distroName) {
                                          
         )" << std::endl;
 
-        return "\033[94m" + std::string(ASCII) + " \033[0mfiglet not found. Falling back to default ascii art!";
+        return "\033[94m" + std::string(ASCII) + " \033[0m'figlet' not found. Falling back to default ascii art!";
     }
 
     std::ofstream tempFontFile("temp_font.flf");

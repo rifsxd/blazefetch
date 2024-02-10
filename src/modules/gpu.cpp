@@ -80,7 +80,7 @@ std::string getVramInfo() {
 std::string getGpuInfo() {
 
     if (!isUtilsAvailable()) {
-        return "\033[94m" + std::string(GPU) + " \033[0mUtils (glxinfo & lspci) not found";
+        return "\033[94m" + std::string(GPU) + " \033[0m'glxinfo' & 'lspci' not found";
     }
 
     // FILE *lspci = popen("echo '01:00.0 VGA compatible controller: NVIDIA Corporation GP104 [GeForce GTX 1080] (rev a1)'", "r"); // Debugging NVIDIA GPU

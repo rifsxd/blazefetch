@@ -17,7 +17,7 @@ bool isAlsaAvailable() {
 std::string getAudioVolumeInfo() {
 
     if (!isAlsaAvailable()) {
-        return "\033[31m" + std::string(VOLUME_MUTED) + " \033[0mamixer not found";
+        return "\033[31m" + std::string(VOLUME_MUTED) + " \033[0m'amixer' not found";
     }	
 
     std::string command = "amixer sget Master | grep 'Front Left:' | awk -F'[][]' '{ print $2 }'";

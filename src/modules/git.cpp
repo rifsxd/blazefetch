@@ -1,5 +1,18 @@
 #include "helper.cpp"
 
+bool isLessAvailable() {
+    FILE *checkLess = popen("command -v less 2>/dev/null", "r");
+    if (checkLess) {
+        char buffer[256];
+        if (fgets(buffer, sizeof(buffer), checkLess) != nullptr) {
+            pclose(checkLess);
+            return true;
+        }
+        pclose(checkLess);
+    }
+    return false;
+}
+
 // Callback function to write the response from the HTTP request
 size_t writeCallback(void* contents, size_t size, size_t nmemb, std::string* response) {
     response->append((char*)contents, size * nmemb);
@@ -56,6 +69,12 @@ void printPrettyCommitInfo(const std::string& json, int commitLimit) {
 }
 
 void getCommitInfo(int commitLimit) {
+
+    if (!isLessAvailable()) {
+        std::cerr << "\n" << "\033[94m" << " ? ERROR ? " << " \033[0m'less' not found to view git commit logs." << "\033[94m" << " ? ERROR ? " << " \033[0m" << "\n" << std::endl;
+        return; // Return early if less is not available
+    }
+
     std::string url = "https://api.github.com/repos/rifsxd/blazefetch/commits";
     CURL* curl;
     CURLcode res;
