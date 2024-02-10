@@ -1,14 +1,14 @@
 #include "helper.cpp"
 
 bool isUtilsAvailable() {
-    FILE *checkNMCLI = popen("command -v glxinfo lspci 2>/dev/null", "r");
-    if (checkNMCLI) {
-        char buffer[128];
-        if (fgets(buffer, sizeof(buffer), checkNMCLI) != nullptr) {
-            pclose(checkNMCLI);
+    FILE *checkUtils = popen("command -v glxinfo lspci 2>/dev/null", "r");
+    if (checkUtils) {
+        char buffer[256];
+        if (fgets(buffer, sizeof(buffer), checkUtils) != nullptr) {
+            pclose(checkUtils);
             return true;
         }
-        pclose(checkNMCLI);
+        pclose(checkUtils);
     }
     return false;
 }
@@ -80,7 +80,7 @@ std::string getVramInfo() {
 std::string getGpuInfo() {
 
     if (!isUtilsAvailable()) {
-        return "\033[94m" + std::string(GPU) + " \033[0m Utils (glxinfo & lspci) not found";
+        return "\033[94m" + std::string(GPU) + " \033[0mUtils (glxinfo & lspci) not found";
     }
 
     // FILE *lspci = popen("echo '01:00.0 VGA compatible controller: NVIDIA Corporation GP104 [GeForce GTX 1080] (rev a1)'", "r"); // Debugging NVIDIA GPU

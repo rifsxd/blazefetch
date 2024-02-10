@@ -1,71 +1,59 @@
 #include "helper.cpp"
 
+bool isAlsaAvailable() {
+    FILE *checkALSA = popen("command -v amixer 2>/dev/null", "r");
+    if (checkALSA) {
+        char buffer[256];
+        if (fgets(buffer, sizeof(buffer), checkALSA) != nullptr) {
+            pclose(checkALSA);
+            return true;
+        }
+        pclose(checkALSA);
+    }
+    return false;
+}
+
 // Function to get the current audio volume
 std::string getAudioVolumeInfo() {
-    long min, max, volume;
-    snd_mixer_t *handle;
-    snd_mixer_elem_t *elem;
-    snd_mixer_selem_id_t *sid;
 
-    const char *card = "default";
-    const char *selem_name = "Master";
+    if (!isAlsaAvailable()) {
+        return "\033[31m" + std::string(VOLUME_MUTED) + " \033[0mamixer not found";
+    }	
 
-    // Open mixer
-    if (snd_mixer_open(&handle, 0) < 0) {
-        return "Error: Unable to open mixer";
+    std::string command = "amixer sget Master | grep 'Front Left:' | awk -F'[][]' '{ print $2 }'";
+    std::string result;
+
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) {
+        return "Error: Unable to open pipe for command execution";
     }
 
-    // Attach the mixer handle to the given card
-    if (snd_mixer_attach(handle, card) < 0) {
-        snd_mixer_close(handle);
-        return "Error: Unable to attach mixer to card";
+    char buffer[256];
+    while (!feof(pipe)) {
+        if (fgets(buffer, 256, pipe) != nullptr) {
+            result += buffer;
+        }
     }
 
-    // Register mixer elements
-    if (snd_mixer_selem_register(handle, NULL, NULL) < 0) {
-        snd_mixer_close(handle);
-        return "Error: Unable to register mixer elements";
-    }
+    pclose(pipe);
 
-    // Load the mixer elements
-    if (snd_mixer_load(handle) < 0) {
-        snd_mixer_close(handle);
-        return "Error: Unable to load mixer elements";
-    }
+    // Remove newline characters from the result
+    result.erase(std::remove(result.begin(), result.end(), '\n'), result.end());
 
-    snd_mixer_selem_id_alloca(&sid);
-
-    // Set the simple element name
-    snd_mixer_selem_id_set_name(sid, selem_name);
-
-    // Get the mixer element
-    elem = snd_mixer_find_selem(handle, sid);
-    if (!elem) {
-        snd_mixer_close(handle);
-        return "Error: Unable to find simple control";
-    }
-
-    // Get the volume range
-    snd_mixer_selem_get_playback_volume_range(elem, &min, &max);
-
-    // Get the current volume
-    snd_mixer_selem_get_playback_volume(elem, SND_MIXER_SCHN_MONO, &volume);
-
-    // Close the mixer
-    snd_mixer_close(handle);
+    std::stringstream ss(result);
+    int volume;
+    ss >> volume;
 
     std::string volumeString;
     if (volume == 0)
-        volumeString = std::string(VOLUME_MUTED) + + "\033[0m" + " " + "Muted!";
+        volumeString = "\033[31m" + std::string(VOLUME_MUTED) + " " + "\033[0m" + "Muted!";
     else {
-        // Calculate percentage
-        int percent = ((volume - min) * 100) / (max - min);
-        
+        // Assuming 100 as the maximum volume value
+        int percent = (volume * 100) / 100; // Change denominator to reflect your max volume
         if (percent < 50)
-            volumeString = std::string(VOLUME_LOW) + "\033[0m";
+            volumeString = "\033[33m" + std::string(VOLUME_LOW) + "\033[0m";
         else
-            volumeString = std::string(VOLUME_HIGH) + "\033[0m";
-
+            volumeString = "\033[32m" + std::string(VOLUME_HIGH) + "\033[0m";
         volumeString += " " + std::to_string(percent) + "%";
     }
 

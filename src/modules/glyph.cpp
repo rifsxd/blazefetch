@@ -3,7 +3,7 @@
 bool isFigletAvailable() {
     FILE *checkPlayerctl = popen("command -v figlet 2>/dev/null", "r");
     if (checkPlayerctl) {
-        char buffer[128];
+        char buffer[256];
         if (fgets(buffer, sizeof(buffer), checkPlayerctl) != nullptr) {
             pclose(checkPlayerctl);
             return true;
@@ -18,10 +18,10 @@ std::string execHelperGlyph(const char* cmd) {
     if (!pipe) {
         throw std::runtime_error("popen() failed!");
     }
-    char buffer[128];
+    char buffer[256];
     std::string result = "";
     while (!feof(pipe.get())) {
-        if (fgets(buffer, 128, pipe.get()) != nullptr) {
+        if (fgets(buffer, 256, pipe.get()) != nullptr) {
             result += buffer;
         }
     }

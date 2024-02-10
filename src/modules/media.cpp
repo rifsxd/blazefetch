@@ -3,7 +3,7 @@
 bool isPlayerctlAvailable() {
     FILE *checkPlayerctl = popen("command -v playerctl 2>/dev/null", "r");
     if (checkPlayerctl) {
-        char buffer[128];
+        char buffer[256];
         if (fgets(buffer, sizeof(buffer), checkPlayerctl) != nullptr) {
             pclose(checkPlayerctl);
             return true;

@@ -3,7 +3,7 @@
 bool isNMCLIAvailable() {
     FILE *checkNMCLI = popen("command -v nmcli 2>/dev/null", "r");
     if (checkNMCLI) {
-        char buffer[128];
+        char buffer[256];
         if (fgets(buffer, sizeof(buffer), checkNMCLI) != nullptr) {
             pclose(checkNMCLI);
             return true;
@@ -14,7 +14,7 @@ bool isNMCLIAvailable() {
 }
 
 std::string runNetworkInfoCMD(const char* command) {
-    char buffer[128];
+    char buffer[256];
     std::string result = "";
 
     // Open the command for reading
