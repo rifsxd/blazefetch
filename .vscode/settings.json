@@ -79,5 +79,5 @@
         "forward_list": "cpp",
         "ranges": "cpp"
     },
-    "cmake.sourceDirectory": "/media/linuxstation/IDE/git/blazefetch/src"
+    "cmake.sourceDirectory": "/mnt/linuxstation/IDE/git/blazefetch/src"
 }
