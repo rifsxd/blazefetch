@@ -35,7 +35,7 @@ std::string getScreenResInfo() {
                         XRRFreeOutputInfo(output_info);
                         XRRFreeScreenResources(res);
                         XCloseDisplay(display);
-                        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + " @ " + std::to_string(refreshRate) + "Hz" + " " + "(wayland)";
+                        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px" + " @ " + std::to_string(refreshRate) + "Hz" + " " + "(wayland)";
                     }
                 }
                 XRRFreeOutputInfo(output_info);
@@ -43,7 +43,7 @@ std::string getScreenResInfo() {
         }
         XRRFreeScreenResources(res);
         XCloseDisplay(display);
-        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + " " + "(wayland)";
+        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px" + " " + "(wayland)";
     }
 
     if (sessionType && std::string(sessionType) == "x11") {
@@ -71,7 +71,7 @@ std::string getScreenResInfo() {
                         XRRFreeOutputInfo(output_info);
                         XRRFreeScreenResources(res);
                         XCloseDisplay(display);
-                        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + " @ " + std::to_string(refreshRate) + "Hz" + " " + "(x11)";
+                        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px" + " @ " + std::to_string(refreshRate) + "Hz" + " " + "(x11)";
                     }
                 }
                 XRRFreeOutputInfo(output_info);
@@ -79,7 +79,7 @@ std::string getScreenResInfo() {
         }
         XRRFreeScreenResources(res);
         XCloseDisplay(display);
-        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + " " + "(x11)";
+        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px" + " " + "(x11)";
     }
 
 

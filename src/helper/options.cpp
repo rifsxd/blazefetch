@@ -11,5 +11,6 @@ const struct option longOptions[] = {
     {"remove", no_argument, NULL, 'r'},
     {"help", no_argument, NULL, 'h'},
     {"kill", no_argument, NULL, 'k'},
+    {"query", required_argument, NULL, 'q'},
     {NULL, 0, NULL, 0} // End of the array
 };

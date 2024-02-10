@@ -75,7 +75,9 @@
         "any": "cpp",
         "codecvt": "cpp",
         "source_location": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "forward_list": "cpp",
+        "ranges": "cpp"
     },
     "cmake.sourceDirectory": "/media/linuxstation/IDE/git/blazefetch/src"
 }

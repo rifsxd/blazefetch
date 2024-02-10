@@ -20,6 +20,8 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
             std::cout << getUptimeInfo() << std::endl;
         } else if (info == "TIME") {
             std::cout << getTimeInfo() << std::endl;
+        } else if (info == "DATE") {
+            std::cout << getDateInfo() << std::endl;
         } else if (info == "SHELL") {
             std::cout << getShellInfo() << std::endl;
         } else if (info == "CPU") {
@@ -36,6 +38,8 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
             std::cout << getDEInfo() << std::endl;
         } else if (info == "MEDIA") {
             std::cout << getMediaInfo() << std::endl;
+        } else if (info == "VOLUME") {
+            std::cout << getAudioVolumeInfo() << std::endl;
         } else if (info == "NETWORK") {
             std::cout << getNetworkStatusInfo() << std::endl;
         } else if (info == "TERM") {

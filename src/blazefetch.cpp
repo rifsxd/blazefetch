@@ -10,7 +10,10 @@
 #include "helper/version.cpp"
 #include "helper/run.cpp"
 
+int CommitNumbers = 5;
+
 int main(int argc, char *argv[]) {
+
     // Declare the identifiers
     int runDaemonFlag       = 0;
     int showVersionFlag     = 0;
@@ -21,7 +24,8 @@ int main(int argc, char *argv[]) {
     int killDaemonFlag      = 0;
     int showStaticFlag      = 0;
     int showASCIIFlag       = 0;
-    int showTandemFlags      = 0;
+    int showTandemFlags     = 0;
+    int showGitFlags        = 0;
 
     // Check for flags
     for (int i = 1; i < argc; i++) {
@@ -41,6 +45,8 @@ int main(int argc, char *argv[]) {
             showHelpFlag = 1;
         } else if (std::strcmp(argv[i], "-k") == 0 || std::strcmp(argv[i], "--kill") == 0) {
             killDaemonFlag = 1;
+        } else if (std::strcmp(argv[i], "-q") == 0 || std::strcmp(argv[i], "--query") == 0) {
+            showGitFlags = 1;
         } else if ((std::strcmp(argv[i], "-r") == 0 || std::strcmp(argv[i], "--remove") == 0) && access(LOCK_FILE_PATH, F_OK) == -1) {
             std::cerr << "\nNo lock file found. Nothing to remove.\n" << std::endl;
             return EXIT_FAILURE;
@@ -52,24 +58,29 @@ int main(int argc, char *argv[]) {
         showTandemFlags = 1;
     }
 
-    // Check if the daemon is already running (excluding -v, -c, -h, --remove, and --daemon flags)
-    if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !showStaticFlag && !showASCIIFlag && !killDaemonFlag) {
+    // Check if the daemon is already running (excluding -v, -c, -h, -a , -s, -q, -r, and -d flags)
+    if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !showStaticFlag && !showASCIIFlag && !killDaemonFlag && !showGitFlags) {
         std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
     }
 
-    const char* getInfo = nullptr; // Variable to store the specified information to fetch
-
     std::vector<std::string> getInfoTypes;
 
+     // Variable to store the specified information to fetch
+
     int opt;
-    while ((opt = getopt_long(argc, argv, "dg:lsavhcrk", longOptions, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "g:q:dlsavhcrk", longOptions, NULL)) != -1) {
         switch (opt) {
-            case 'd':
-                runDaemonFlag = 1;
-                break;
+            
             case 'g':
                 getInfoTypes.push_back(optarg);
+                break;
+            case 'q':
+                CommitNumbers = std::atoi(optarg);
+                showGitFlags = 1;
+                break;
+            case 'd':
+                runDaemonFlag = 1;
                 break;
             case 'l':
                 showLiveFlag = 1;
@@ -146,6 +157,8 @@ int main(int argc, char *argv[]) {
         printHelp();
     } else if (killDaemonFlag) {
         killBlazefetchProcess();
+    } else if (showGitFlags) {
+        getCommitInfo(CommitNumbers);
     } else {
         runProgram();
     }
