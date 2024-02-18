@@ -5,6 +5,7 @@ const struct option longOptions[] = {
     {"version", no_argument, NULL, 'v'},
     {"live", no_argument, NULL, 'l'},
     {"static", no_argument, NULL, 's'},
+    {"minimal", no_argument, NULL, 'm'},
     {"ascii", no_argument, NULL, 'a'},
     {"get", required_argument, NULL, 'g'},
     {"clear", no_argument, NULL, 'c'},

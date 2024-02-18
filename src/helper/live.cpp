@@ -62,10 +62,10 @@ void runLiveProgram() {
         memset(shm, 0, SHM_SIZE);
 
         // Run get<example>Info functions and store the output in shared memory
-        std::string output = getTitleInfo(distroName) + "\n" + getOsInfo() + "\n" + getHostInfo() + "\n" + getPackageInfo() + "\n" +
-                            getKernelInfo() + "\n" + getUptimeInfo() + "\n" + getTimeInfo() + "\n" + getDateInfo() + "\n" + getShellInfo() + "\n" +
-                            getCpuInfo() + "\n" + getGpuInfo() + "\n" + getScreenResInfo() + "\n" + getStorageInfo() + "\n" +
-                            getRamInfo() + "\n" + getDEInfo() + "\n" + getMediaInfo() + "\n" + getAudioVolumeInfo() + "\n" + getNetworkStatusInfo() + "\n" + getTerminalInfo() + "\n\n";
+        std::string output = USER_INFO + "\n" + OS_INFO + "\n" + HOST_INFO + "\n" + PACKAGES_INFO + "\n" +
+                                KERNEL_INFO + "\n" + UPTIME_INFO + "\n" + TIME_INFO + "\n" + DATE_INFO + "\n" + SHELL_INFO + "\n" +
+                                CPU_INFO + "\n" + GPU_INFO + "\n" + SCREEN_INFO + "\n" + BRIGHTNESS_INFO + "\n" + DISK_INFO + "\n" +
+                                RAM_INFO + "\n" + DE_INFO + "\n" + MEDIA_INFO + "\n" + VOLUME_INFO + "\n" + NETWORK_INFO + "\n" + TERM_INFO + "\n\n";
 
         // Update shared memory
         std::strcpy(shm, output.c_str());

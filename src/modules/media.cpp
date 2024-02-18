@@ -18,16 +18,16 @@ std::string getMediaInfo() {
         return "\033[94m" + std::string(MEDIA) + " \033[0mplayerctl not found";
     }
 
-    FILE *mediaInfoFile = popen("playerctl metadata --format '{{artist}} - {{title}}' 2>/dev/null", "r");
+    FILE *mediaInfo = popen("playerctl metadata --format '{{artist}} - {{title}}' 2>/dev/null", "r");
 
-    if (mediaInfoFile) {
+    if (mediaInfo) {
         char buffer[256];
-        if (fgets(buffer, sizeof(buffer), mediaInfoFile) != nullptr) {
+        if (fgets(buffer, sizeof(buffer), mediaInfo) != nullptr) {
             buffer[strcspn(buffer, "\n")] = 0;
-            pclose(mediaInfoFile);
+            pclose(mediaInfo);
             return "\033[94m" + std::string(MEDIA) + " \033[0m" + std::string(buffer);
         } else {
-            pclose(mediaInfoFile);
+            pclose(mediaInfo);
             return "\033[94m" + std::string(MEDIA) + " \033[0mNot playing anything...";
         }
     }

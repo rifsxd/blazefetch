@@ -131,3 +131,39 @@ std::string getGlyphInfo(const std::string& distroName) {
     std::string distroColor = conditionalDistroColor;
     return conditionalDistroColor + figletOutput  + resetColor;
 }
+
+std::string getMinimalGlyphInfo(const std::string& distroName) {
+
+    if (!isFigletAvailable()) {
+        std::cout << yellowColor << R"(
+ ██▓     ██▓ ███▄    █  █    ██ ▒██   ██▒
+▓██▒    ▓██▒ ██ ▀█   █  ██  ▓██▒▒▒ █ █ ▒░
+▒██░    ▒██▒▓██  ▀█ ██▒▓██  ▒██░░░  █   ░
+▒██░    ░██░▓██▒  ▐▌██▒▓▓█  ░██░ ░ █ █ ▒ 
+░██████▒░██░▒██░   ▓██░▒▒█████▓ ▒██▒ ▒██▒
+░ ▒░▓  ░░▓  ░ ▒░   ▒ ▒ ░▒▓▒ ▒ ▒ ▒▒ ░ ░▓ ░
+░ ░ ▒  ░ ▒ ░░ ░░   ░ ▒░░░▒░ ░ ░ ░░   ░▒ ░
+  ░ ░    ▒ ░   ░   ░ ░  ░░░ ░ ░  ░    ░  
+    ░  ░ ░           ░    ░      ░    ░  
+                                         
+        )" << std::endl;
+
+        return "\033[94m" + std::string(ASCII) + " \033[0m'figlet' not found. Falling back to default ascii art!";
+    }
+
+    std::ofstream tempFontFile("temp_font.flf");
+    tempFontFile << customFont;
+    tempFontFile.close();
+
+    // Get the first word of the distro name
+    std::istringstream iss(distroName);
+    std::string firstWord;
+    iss >> firstWord;
+    
+    std::string figletCommand = "figlet -f temp_font.flf \"" + firstWord + "\"";
+    std::string conditionalDistroColor = getConditionalDistroColor(distroName);
+    std::string figletOutput = execHelperGlyph(figletCommand.c_str());
+    std::remove("temp_font.flf");
+    std::string distroColor = conditionalDistroColor;
+    return conditionalDistroColor + figletOutput  + resetColor;
+}

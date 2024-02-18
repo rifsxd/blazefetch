@@ -21,3 +21,4 @@
 #include "../modules/host.cpp"
 #include "../modules/volume.cpp"
 #include "../modules/git.cpp"
+#include "../modules/brightness.cpp"

@@ -1,24 +1,28 @@
+// C++ Core Headers
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-#include <unistd.h>
 #include <ctime>
 #include <fstream>
 #include <csignal>
-#include <fcntl.h>
-#include <getopt.h>
 #include <vector>
-#include <dirent.h>
 #include <unordered_map>
-#include <termios.h>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
 #include <cstdio>
 #include <memory>
 #include <array>
-#include <ifaddrs.h>
 
+// Base Headers
+#include <ifaddrs.h>
+#include <unistd.h>
+#include <termios.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <getopt.h>
+
+// Sys Headers
 #include <sys/wait.h>
 #include <sys/shm.h>
 #include <sys/utsname.h>
@@ -27,15 +31,19 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+// XOrg Headers
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 #include <X11/extensions/Xrandr.h>
 
+// Alsa Headers
 #include <alsa/asoundlib.h>
 
+// Curl Headers
 #include <curl/curl.h>
 
+// Fetch Titles Defines
 #ifdef ICONIC
 #define ASCII ""
 #define USER ""
@@ -50,11 +58,12 @@
 #define CPU ""
 #define GPU "󰿵"
 #define SCREEN "󰹑"
+#define BRIGHTNESS "󰃠"
 #define DISK "󰋊"
 #define RAM "󰇻"
 #define DE "󰖲"
 #define MEDIA "󰲸"
-#define VOLUME_HIGH ":"
+#define VOLUME_HIGH ""
 #define VOLUME_LOW ""
 #define VOLUME_MUTED ""
 #define NETWORK "󰛳"
@@ -74,6 +83,7 @@
 #define CPU " CPU:"
 #define GPU "󰿵 GPU:"
 #define SCREEN "󰹑 SCREEN:"
+#define BRIGHTNESS "󰃠 BRIGHTNESS:"
 #define DISK "󰋊 DISK:"
 #define RAM "󰇻 RAM:"
 #define DE "󰖲 DE:"
@@ -103,3 +113,25 @@
 */
 #endif
 
+// Fetch Function Defines
+#define ASCII_INFO getGlyphInfo()
+#define OS_INFO getOsInfo()
+#define USER_INFO getTitleInfo(distroName)
+#define HOST_INFO getHostInfo()
+#define PACKAGES_INFO getPackageInfo()
+#define KERNEL_INFO getKernelInfo()
+#define UPTIME_INFO getUptimeInfo()
+#define TIME_INFO getTimeInfo()
+#define DATE_INFO getDateInfo()
+#define SHELL_INFO getShellInfo()
+#define CPU_INFO getCpuInfo()
+#define GPU_INFO getGpuInfo()
+#define SCREEN_INFO getScreenResInfo()
+#define BRIGHTNESS_INFO getBrightnessInfo()
+#define DISK_INFO getStorageInfo()
+#define RAM_INFO getRamInfo()
+#define DE_INFO getDEInfo()
+#define MEDIA_INFO getMediaInfo()
+#define VOLUME_INFO getAudioVolumeInfo()
+#define NETWORK_INFO getNetworkStatusInfo()
+#define TERM_INFO getTerminalInfo()
