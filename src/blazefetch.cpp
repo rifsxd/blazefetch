@@ -4,6 +4,7 @@
 #include "helper/live.cpp"
 #include "helper/static.cpp"
 #include "helper/minimal.cpp"
+#include "helper/cute.cpp"
 #include "helper/ascii.cpp"
 #include "helper/help.cpp"
 #include "helper/get.cpp"
@@ -24,6 +25,8 @@ int main(int argc, char *argv[]) {
     int killDaemonFlag              = 0;
     int showStaticFlag              = 0;
     int showMinimalFlag             = 0;
+    int showBunnyFlag               = 0;
+    int showPussyFlag               = 0;
     int showASCIIFlag               = 0;
     int showTandemFlags             = 0;
     int showMinimalTandemFlags      = 0;
@@ -43,6 +46,10 @@ int main(int argc, char *argv[]) {
             showStaticFlag = 1;
         } else if (std::strcmp(argv[i], "-m") == 0 || std::strcmp(argv[i], "--minimal") == 0) {
             showMinimalFlag = 1;
+        } else if (std::strcmp(argv[i], "-b") == 0 || std::strcmp(argv[i], "--bunny") == 0) {
+            showBunnyFlag = 1;
+        } else if (std::strcmp(argv[i], "-p") == 0 || std::strcmp(argv[i], "--pussy") == 0) {
+            showPussyFlag = 1;
         } else if (std::strcmp(argv[i], "-a") == 0 || std::strcmp(argv[i], "--ascii") == 0) {
             showASCIIFlag = 1;
         } else if (std::strcmp(argv[i], "-h") == 0 || std::strcmp(argv[i], "--help") == 0) {
@@ -67,7 +74,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Check if the daemon is already running (excluding -v, -c, -h, -a , -s, -q, -r, and -d flags)
-    if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !showStaticFlag && !showMinimalFlag && !showASCIIFlag && !killDaemonFlag && !showGitFlags) {
+    if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !showStaticFlag && !showMinimalFlag && !showBunnyFlag && !showPussyFlag && !showASCIIFlag && !killDaemonFlag && !showGitFlags) {
         std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
     }
@@ -77,7 +84,7 @@ int main(int argc, char *argv[]) {
      // Variable to store the specified information to fetch
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "g:q:dlsmavhcrk", longOptions, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "g:q:dlsmbpavhcrk", longOptions, NULL)) != -1) {
         switch (opt) {
             
             case 'g':
@@ -98,6 +105,12 @@ int main(int argc, char *argv[]) {
                 break;
             case 'm':
                 showMinimalFlag = 1;
+                break;
+            case 'b':
+                showBunnyFlag = 1;
+                break;
+            case 'p':
+                showPussyFlag = 1;
                 break;
             case 'a':
                 showASCIIFlag = 1;
@@ -165,6 +178,10 @@ int main(int argc, char *argv[]) {
         runMinimalProgram();
     } else if (showMinimalFlag) {
         runMinimalProgram();
+    } else if (showBunnyFlag) {
+        runBunnyProgram();
+    } else if (showPussyFlag) {
+        runPussyProgram();
     } else if (showASCIIFlag) {
         runASCIIProgram();
     } else if (!getInfoTypes.empty()) {

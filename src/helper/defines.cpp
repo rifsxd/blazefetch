@@ -135,3 +135,5 @@
 #define VOLUME_INFO getAudioVolumeInfo()
 #define NETWORK_INFO getNetworkStatusInfo()
 #define TERM_INFO getTerminalInfo()
+#define PUSSY_GREETING getRandomPussyGreeting()
+#define BUNNY_GREETING getRandomBunnyGreeting()

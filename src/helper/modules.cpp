@@ -22,3 +22,4 @@
 #include "../modules/volume.cpp"
 #include "../modules/git.cpp"
 #include "../modules/brightness.cpp"
+#include "../modules/greeting.cpp"
