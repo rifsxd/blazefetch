@@ -31,11 +31,15 @@ std::string getScreenResInfo() {
                     }
                     if (mode_info) {
                         int refreshRate = (int) (mode_info->dotClock / (mode_info->hTotal * mode_info->vTotal) + 1);
+
+                        // Get the connection name (port)
+                        std::string connectionName = output_info->name;
+
                         XRRFreeCrtcInfo(crtc_info);
                         XRRFreeOutputInfo(output_info);
                         XRRFreeScreenResources(res);
                         XCloseDisplay(display);
-                        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px" + " @ " + std::to_string(refreshRate) + "Hz" + " " + "(wayland)";
+                        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px" + " @ " + std::to_string(refreshRate) + "Hz" + " * " + connectionName;
                     }
                 }
                 XRRFreeOutputInfo(output_info);
@@ -43,7 +47,7 @@ std::string getScreenResInfo() {
         }
         XRRFreeScreenResources(res);
         XCloseDisplay(display);
-        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px" + " " + "(wayland)";
+        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px";
     }
 
     if (sessionType && std::string(sessionType) == "x11") {
@@ -67,11 +71,15 @@ std::string getScreenResInfo() {
                     }
                     if (mode_info) {
                         int refreshRate = (int) (mode_info->dotClock / (mode_info->hTotal * mode_info->vTotal) + 1);
+
+                        // Get the connection name (port)
+                        std::string connectionName = output_info->name;
+
                         XRRFreeCrtcInfo(crtc_info);
                         XRRFreeOutputInfo(output_info);
                         XRRFreeScreenResources(res);
                         XCloseDisplay(display);
-                        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px" + " @ " + std::to_string(refreshRate) + "Hz" + " " + "(x11)";
+                        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px" + " @ " + std::to_string(refreshRate) + "Hz" + " * " + connectionName;
                     }
                 }
                 XRRFreeOutputInfo(output_info);
@@ -79,9 +87,8 @@ std::string getScreenResInfo() {
         }
         XRRFreeScreenResources(res);
         XCloseDisplay(display);
-        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px" + " " + "(x11)";
+        return "\033[92m" + std::string(SCREEN) + " \033[0m" + std::to_string(screenWidth) + "x" + std::to_string(screenHeight) + "Px";
     }
 
-
-    return "\033[92m" + std::string(SCREEN) + " \033[0mUnknown";;
+    return "\033[92m" + std::string(SCREEN) + " \033[0mUnknown";
 }

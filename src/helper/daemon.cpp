@@ -1,7 +1,6 @@
 #include "defines.cpp"
 #include "modules.cpp"
 #include "memory.cpp"
-#include "colors.cpp"
 
 #define LOCK_FILE_PATH "/tmp/blazefetch.lock"
 
@@ -81,7 +80,7 @@ void killBlazefetchProcess() {
         if (fscanf(processCmd, "%d", &pid) != 1) {
             // Handle the case where fscanf fails to read the expected value
             perror("fscanf");
-            std::cerr << "\nError reading process ID for " << PROCESS_NAME << ".\n" << std::endl;
+            std::cerr << redColor << "\nError reading process ID for " << PROCESS_NAME << ".\n" << std::endl;
             pid = -1;  // Set pid to an invalid value
         }
 
@@ -89,35 +88,35 @@ void killBlazefetchProcess() {
     } else {
         // Handle the case where popen fails
         perror("popen");
-        std::cerr << "\nError executing command to find " << PROCESS_NAME << " process.\n" << std::endl;
+        std::cerr << redColor << "\nError executing command to find " << PROCESS_NAME << " process.\n" << std::endl;
     }
 
     // Check if the process ID is valid and kill the process
     if (pid > 0) {
         if (kill(pid, SIGTERM) == 0) {
-            std::cout << "\nTerminated " << PROCESS_NAME << " process...\n" << std::endl;
+            std::cout << yellowColor << "\nTerminated " << PROCESS_NAME << " process...\n" << std::endl;
             // Optionally wait for the process to exit
             waitpid(pid, nullptr, 0);
         } else {
             perror("kill");
-            std::cerr << "\nFailed to terminate " << PROCESS_NAME << " process.\n" << std::endl;
+            std::cerr << redColor << "\nFailed to terminate " << PROCESS_NAME << " process.\n" << std::endl;
         }
     } else {
-        std::cerr << "\n" << PROCESS_NAME << " process not found.\n" << std::endl;
+        std::cerr << yellowColor << "\n" << PROCESS_NAME << " process not found.\n" << std::endl;
     }
 }
 
 void runDaemon() {
 
     std::string distroName = getDistroInfo();
-
+    
     // Set up signal handling
     signal(SIGTERM, signalHandler);
     signal(SIGINT, signalHandler);
 
     // Check if the lock file exists
     if (access(LOCK_FILE_PATH, F_OK) != -1) {
-        std::cerr << "\nUmm... Blaze daemon is already running?!\n" << std::endl;
+        std::cerr << yellowColor << "\nUmm... Blaze daemon is already running?!\n" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -129,8 +128,8 @@ void runDaemon() {
     }
 
     // Display the message only when creating the lock file for the first time
-    std::cout << "\nBlaze daemon is running in the background." << std::endl;
-    std::cout << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
+    std::cout << greenColor << "\nBlaze daemon is running in the background." << std::endl;
+    std::cout << blueColor << "Use 'blazefetch' command to fetch and display system information.\n" << std::endl;
     // Daemonize the process
     daemonize();
 
@@ -162,21 +161,12 @@ void runDaemon() {
         // Update shared memory
         std::strcpy(shm, output.c_str());
 
-        // Display cached info
-        std::cout << "\n" << shm;
-
-        colorPallate();
-
-        // Detach the shared memory segment
-        shmdt(shm);
-
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     // Detach the shared memory segment
     shmdt(shm);
 
-    // Remove the shared memory segment (optional, depending on your requirements)
-    shmctl(shmid, IPC_RMID, NULL);
     // Remove the lock file before exiting
     if (unlink(LOCK_FILE_PATH) == -1) {
         perror("unlink");

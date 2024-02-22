@@ -1,6 +1,7 @@
 #include "helper/defines.cpp"
 #include "helper/memory.cpp"
 #include "helper/daemon.cpp"
+#include "helper/run.cpp"
 #include "helper/live.cpp"
 #include "helper/static.cpp"
 #include "helper/minimal.cpp"
@@ -10,8 +11,6 @@
 #include "helper/get.cpp"
 #include "helper/options.cpp"
 #include "helper/version.cpp"
-
-int CommitNumbers = 5;
 
 int main(int argc, char *argv[]) {
 
@@ -58,9 +57,8 @@ int main(int argc, char *argv[]) {
             killDaemonFlag = 1;
         } else if (std::strcmp(argv[i], "-q") == 0 || std::strcmp(argv[i], "--query") == 0) {
             showGitFlags = 1;
-        } else if ((std::strcmp(argv[i], "-r") == 0 || std::strcmp(argv[i], "--remove") == 0) && access(LOCK_FILE_PATH, F_OK) == -1) {
-            std::cerr << "\nNo lock file found. Nothing to remove.\n" << std::endl;
-            return EXIT_FAILURE;
+        } else if (std::strcmp(argv[i], "-r") == 0 || std::strcmp(argv[i], "--remove") == 0) {
+            removeLockFlag = 1;
         }
     }
 
@@ -69,24 +67,24 @@ int main(int argc, char *argv[]) {
         showTandemFlags = 1;
     }
 
+    // Check if both -m and -a flags are present
     if (showMinimalFlag && showASCIIFlag) {
         showMinimalTandemFlags = 1;
     }
 
     // Check if the daemon is already running (excluding -v, -c, -h, -a , -s, -q, -r, and -d flags)
     if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !showStaticFlag && !showMinimalFlag && !showBunnyFlag && !showPussyFlag && !showASCIIFlag && !killDaemonFlag && !showGitFlags) {
-        std::cerr << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
+        std::cerr << yellowColor << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
         return EXIT_FAILURE;
     }
 
     std::vector<std::string> getInfoTypes;
 
-     // Variable to store the specified information to fetch
+    int CommitNumbers;
 
     int opt;
     while ((opt = getopt_long(argc, argv, "g:q:dlsmbpavhcrk", longOptions, NULL)) != -1) {
         switch (opt) {
-            
             case 'g':
                 getInfoTypes.push_back(optarg);
                 break;
@@ -139,7 +137,7 @@ int main(int argc, char *argv[]) {
     if (removeLockFlag) {
         // Check if the lock file exists before attempting to remove it
         if (access(LOCK_FILE_PATH, F_OK) == -1) {
-            std::cerr << "\nNo lock file found. Nothing to remove.\n" << std::endl;
+            std::cout << orangeColor << "\nNo lock file found. Nothing to remove.\n" << std::endl;
             return EXIT_FAILURE;
         }
 
@@ -148,7 +146,7 @@ int main(int argc, char *argv[]) {
             perror("unlink");
             exit(EXIT_FAILURE);
         }
-        std::cout << "\nLock file removed successfully.\n" << std::endl;
+        std::cout << greenColor << "\nLock file removed successfully.\n" << std::endl;
         return EXIT_SUCCESS;
     }
 
@@ -193,8 +191,8 @@ int main(int argc, char *argv[]) {
     } else if (showGitFlags) {
         getCommitInfo(CommitNumbers);
     } else {
-        runDaemon();
+        runProgram();
     }
-
+    
     return 0;
 }

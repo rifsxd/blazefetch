@@ -30,6 +30,8 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
             std::cout << getGpuInfo() << std::endl;
         } else if (info == "SCREEN") {
             std::cout << getScreenResInfo() << std::endl;
+        } else if (info == "BRIGHTNESS") {
+            std::cout << getBrightnessInfo() << std::endl;
         } else if (info == "DISK") {
             std::cout << getStorageInfo() << std::endl;
         } else if (info == "RAM") {
@@ -45,7 +47,7 @@ void getInfoAndPrint(const std::vector<std::string>& infoTypes) {
         } else if (info == "TERM") {
             std::cout << getTerminalInfo() << std::endl;
         } else {
-            std::cerr << "Invalid information type: " << info << std::endl;
+            std::cerr << orangeColor << "Invalid information type: " << resetColor << redColor << info << std::endl;
         }
     }
 }

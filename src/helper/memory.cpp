@@ -1,6 +1,8 @@
 #pragma once
 
 #include "defines.cpp"
+#include "colors.cpp"
+
 #define SHM_SIZE 1024
 
 int getExistingSharedMemory() {
@@ -74,5 +76,5 @@ void clearStoredMemory() {
     // Detach the shared memory segment
     shmdt(shm);
 
-    std::cout << "\nStored blaze memory has been cleared.\n" << std::endl;
+    std::cout << orangeColor << "\nStored blaze memory has been cleared.\n" << std::endl;
 }
