@@ -81,5 +81,5 @@
         "hash_map": "cpp",
         "expected": "cpp"
     },
-    "cmake.sourceDirectory": "/mnt/linuxstation/IDE/git/blazefetch/src"
+    "cmake.sourceDirectory": "D:/IDE/blazefetch/src"
 }

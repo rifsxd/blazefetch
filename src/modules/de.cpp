@@ -4,6 +4,11 @@ std::string getDEInfo() {
     char *waylandDisplay = getenv("WAYLAND_DISPLAY");
     char *Session = getenv("XDG_SESSION_TYPE");
 
+    if (Session == nullptr) {
+        // Handle null pointer for XDG_SESSION_TYPE
+        return "\033[38;5;93m" + std::string(DE) + " \033[0mUnknown";
+    }
+
     if (strstr(Session, "wayland") != nullptr) {
         char *xdgDesktop = getenv("XDG_CURRENT_DESKTOP");
         return "\033[38;5;93m" + std::string(DE) + " \033[0m" + (xdgDesktop ? xdgDesktop : "Unknown") + + " (" + Session + ")";
