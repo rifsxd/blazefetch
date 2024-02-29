@@ -32,17 +32,28 @@ sudo make clean install_iconic
 
 # Usage
 	blazefetch [OPTIONS]
+
 		Options:
-			-d, --daemon      Run as a daemon
-			-g, --get <INFO>  Get and display specific information (e.g. OS, GPU)
-			-l, --live        Launch live fetch instance
-			-s, --static      Show static fetch information
-			-a, --ascii       Show ascii art of your distro (can be used as tandem with -s, --static)
-			-c, --clear       Clears the stored cache from memory\n"
-			-r, --remove      Removes the lock file incase if something went wrong
-			-v, --version     Show version information
-			-k, --kill        Kill the daemon process
-			-h, --help        Show this help message
+			-d, --daemon                 Run as a daemon
+			-g, --get <MODULE>           Get and display specific information (example: OS, GPU, etc)
+			-l, --live                   Launch live fetch instance
+			-s, --static                 Show static fetch information
+			-m, --minimal                Show Minimal fetch information
+			-a, --ascii                  Show ascii art of your distro
+			-c, --clear                  Clears the stored cache from memory
+			-r, --remove                 Removes the lock file incase if something went wrong
+			-v, --version                Show version information
+			-k, --kill                   Kill the daemon process
+			-q, --query <NUMBER>         Query git logs and commits
+			-h, --help                   Show this help message
+
+			Combined Options:
+			-a -m, --ascii --minimal     Show distro ascii art combined with minimal fetch info
+			-a -s, --ascii --static      Show distro ascii art combined with static fetch info
+
+			Extra Options:
+			-b, --bunny                  Show cute bunny fetch info
+			-p, --pussy                  Show cute pussy fetch info
 
 # License
 Blazefetch is licensed under the MIT license.  
