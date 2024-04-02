@@ -54,6 +54,9 @@ sudo make clean install_iconic
 			Extra Options:
 			-b, --bunny                  Show cute bunny fetch info
 			-p, --pussy                  Show cute pussy fetch info
+		
+		Env Variables:
+			BLZ_OS="Xxxx"				 Env variable that OS and GLYPH modules look for custom user set distro names
 
 # License
 Blazefetch is licensed under the MIT license.  

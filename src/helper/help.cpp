@@ -24,5 +24,8 @@ void printHelp() {
 
               << blueColor      <<      "Extra Options:\n"
               << orangeColor    <<      "  -b, --bunny                  Show cute bunny fetch info\n"
-              << purpleColor    <<      "  -p, --pussy                  Show cute pussy fetch info\n" << resetColor << std::endl;   
+              << purpleColor    <<      "  -p, --pussy                  Show cute pussy fetch info\n\n"
+
+              << blueColor      <<      "Env Varibales:\n"
+              << purpleColor     <<      "  BLZ_OS='Xxxx'                Env variable that OS and GLYPH modules look for custom user set distro names\n" << resetColor << std::endl;   
 }

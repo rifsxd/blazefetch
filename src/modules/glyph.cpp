@@ -30,6 +30,13 @@ std::string execHelperGlyph(const char* cmd) {
 
 
 std::string getDistroInfo() {
+    // Check if BLZ_OS environment variable is set
+    char* blzOsEnv = std::getenv("BLZ_OS");
+    if (blzOsEnv != nullptr && blzOsEnv[0] != '\0') {
+        return blzOsEnv;
+    }
+
+    // If BLZ_OS is not set or empty, fallback to reading from /etc/os-release
     std::ifstream file("/etc/os-release");
     if (file.is_open()) {
         std::string line;
