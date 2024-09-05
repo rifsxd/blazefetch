@@ -1,19 +1,19 @@
 #include "defines.cpp"
 
 const struct option longOptions[] = {
-    {"daemon", no_argument, NULL, 'd'},
-    {"version", no_argument, NULL, 'v'},
-    {"live", no_argument, NULL, 'l'},
-    {"static", no_argument, NULL, 's'},
-    {"minimal", no_argument, NULL, 'm'},
-    {"pussy", no_argument, NULL, 'p'},
-    {"bunny", no_argument, NULL, 'b'},
-    {"ascii", no_argument, NULL, 'a'},
-    {"get", required_argument, NULL, 'g'},
-    {"clear", no_argument, NULL, 'c'},
-    {"remove", no_argument, NULL, 'r'},
-    {"help", no_argument, NULL, 'h'},
-    {"kill", no_argument, NULL, 'k'},
-    {"query", required_argument, NULL, 'q'},
-    {NULL, 0, NULL, 0} // End of the array
+    {"daemon", no_argument, nullptr, 'd'},
+    {"version", no_argument, nullptr, 'v'},
+    {"live", no_argument, nullptr, 'l'},
+    {"static", no_argument, nullptr, 's'},
+    {"minimal", no_argument, nullptr, 'm'},
+    {"pussy", no_argument, nullptr, 'p'},
+    {"bunny", no_argument, nullptr, 'b'},
+    {"ascii", no_argument, nullptr, 'a'},
+    {"get", required_argument, nullptr, 'g'},
+    {"clear", no_argument, nullptr, 'c'},
+    {"remove", no_argument, nullptr, 'r'},
+    {"help", no_argument, nullptr, 'h'},
+    {"kill", no_argument, nullptr, 'k'},
+    {"query", required_argument, nullptr, 'q'},
+    {nullptr, 0, nullptr, 0} // End of the array
 };

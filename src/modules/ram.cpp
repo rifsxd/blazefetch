@@ -6,7 +6,7 @@ std::string getRamInfo() {
         long total_mem = 0, free_mem = 0, buffers = 0, cached = 0;
         char line[256];
 
-        while (fgets(line, sizeof(line), meminfo) != NULL) {
+        while (fgets(line, sizeof(line), meminfo) != nullptr) {
             if (sscanf(line, "MemTotal: %ld kB", &total_mem) == 1) {
                 continue;
             }

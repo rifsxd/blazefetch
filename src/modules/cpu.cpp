@@ -74,7 +74,7 @@ std::string getCpuInfo() {
 
         std::string cpufreq = getMaxCpuFreq();
 
-        while (fgets(line, sizeof(line), cpuinfo) != NULL) {
+        while (fgets(line, sizeof(line), cpuinfo) != nullptr) {
             if (strstr(line, "model name")) {
                 char *model = strchr(line, ':') + 2;
                 model[strlen(model) - 1] = '\0'; // Remove the trailing newline

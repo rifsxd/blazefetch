@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
 
     // Check if the daemon is already running (excluding -v, -c, -h, -a , -s, -q, -r, and -d flags)
     if (!runDaemonFlag && !showVersionFlag && !clearMemoryFlag && !showHelpFlag && !removeLockFlag && access(LOCK_FILE_PATH, F_OK) == -1 && !showLiveFlag && !showStaticFlag && !showMinimalFlag && !showBunnyFlag && !showPussyFlag && !showASCIIFlag && !killDaemonFlag && !showGitFlags) {
-        std::cerr << yellowColor << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << std::endl;
+        std::cerr << yellowColor << "\nBlaze daemon is not running. Please run 'blazefetch --daemon' to start the daemon first.\n" << resetColor << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -83,13 +83,13 @@ int main(int argc, char *argv[]) {
     int CommitNumbers;
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "g:q:dlsmbpavhcrk", longOptions, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "g:q:dlsmbpavhcrk", longOptions, nullptr)) != -1) {
         switch (opt) {
             case 'g':
                 getInfoTypes.push_back(optarg);
                 break;
             case 'q':
-                CommitNumbers = std::atoi(optarg);
+                CommitNumbers = atoi(optarg);  // Correct usage of atoi without `std::` prefix.
                 showGitFlags = 1;
                 break;
             case 'd':

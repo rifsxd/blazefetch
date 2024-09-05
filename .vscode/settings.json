@@ -79,7 +79,8 @@
         "forward_list": "cpp",
         "ranges": "cpp",
         "hash_map": "cpp",
-        "expected": "cpp"
+        "expected": "cpp",
+        "text_encoding": "cpp"
     },
-    "cmake.sourceDirectory": "/mnt/e/IDE/blazefetch/src"
+    "cmake.sourceDirectory": "/run/media/rifsxd/Extras/IDE/blazefetch/src"
 }

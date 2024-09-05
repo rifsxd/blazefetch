@@ -43,21 +43,29 @@ std::string getNetworkStatusInfo() {
         return "\033[94m" + std::string(NETWORK) + " \033[0m'nmcli' not found";
     }
 
-    std::string wiredInterfaceCommand = "ls /sys/class/net | grep -E '^enp[0-9]+s[0-9]+$'";
+    std::string wiredInterfaceCommand1 = "ls /sys/class/net | grep -E '^enp[0-9]+[a-z]+[0-9]+[a-z]+[0-9]+[a-z]+[0-9]$'";
+    std::string wiredInterfaceCommand2 = "ls /sys/class/net | grep -E '^enp[0-9]+[a-z]+[0-9]+$'";
     std::string wirelessInterfaceCommand1 = "ls /sys/class/net | grep -E '^wlan[0-9]+$'";
-    std::string wirelessInterfaceCommand2 = "ls /sys/class/net | grep -E '^wlp[0-9]+s[0-9]+$'";
+    std::string wirelessInterfaceCommand2 = "ls /sys/class/net | grep -E '^wlp[0-9]+[a-z]+[0-9]+$'";
 
     std::string activeInterface;
 
-    // Check for wired interface
-    activeInterface = runNetworkInfoCMD(wiredInterfaceCommand.c_str());
-    if (activeInterface.empty()) {
-        // Check for wireless interface using the first pattern
-        activeInterface = runNetworkInfoCMD(wirelessInterfaceCommand1.c_str());
+    // Check for wired interfaces
+    activeInterface = runNetworkInfoCMD(wiredInterfaceCommand1.c_str());
 
-        // If the first pattern is null, try the second pattern
+    // If no wired interface found, check the second wired pattern
+    if (activeInterface.empty()) {
+        activeInterface = runNetworkInfoCMD(wiredInterfaceCommand2.c_str());
+
+        // If no wired interface found with either pattern, check for wireless interfaces
         if (activeInterface.empty()) {
-            activeInterface = runNetworkInfoCMD(wirelessInterfaceCommand2.c_str());
+            // Check for wireless interface using the first pattern
+            activeInterface = runNetworkInfoCMD(wirelessInterfaceCommand1.c_str());
+
+            // If still no wireless interface found, try the second wireless pattern
+            if (activeInterface.empty()) {
+                activeInterface = runNetworkInfoCMD(wirelessInterfaceCommand2.c_str());
+            }
         }
     }
 

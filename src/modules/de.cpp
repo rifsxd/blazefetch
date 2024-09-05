@@ -23,7 +23,7 @@ std::string getDEInfo() {
     }
 
     // Fall back to the final else block if none of the conditions are met
-    Display *display = XOpenDisplay(NULL);
+    Display *display = XOpenDisplay(nullptr);
     if (display) {
         Window root = DefaultRootWindow(display);
 
@@ -35,7 +35,7 @@ std::string getDEInfo() {
             Atom actualType;
             int actualFormat;
             unsigned long nItems, bytesAfter;
-            unsigned char *propValue = NULL;
+            unsigned char *propValue = nullptr;
 
             if (XGetWindowProperty(display, root, netSupportingWmCheckAtom, 0, 1, False,
                                    XA_WINDOW, &actualType, &actualFormat,

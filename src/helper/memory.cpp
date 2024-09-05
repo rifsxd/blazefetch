@@ -54,7 +54,7 @@ void detachSharedMemory(char* shm) {
 }
 
 void removeSharedMemory(int shmid) {
-    if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+    if (shmctl(shmid, IPC_RMID, nullptr) == -1) {
         perror("shmctl");
         exit(EXIT_FAILURE);
     }

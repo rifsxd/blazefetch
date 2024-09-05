@@ -49,7 +49,7 @@ std::string execHelperTitle(const char* cmd) {
         return "ERROR";
     }
     while (!feof(pipe)) {
-        if (fgets(buffer, 256, pipe) != NULL)
+        if (fgets(buffer, 256, pipe) != nullptr)
             result += buffer;
     }
     pclose(pipe);

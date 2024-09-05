@@ -1,7 +1,7 @@
 #include "defines.cpp"
 #include "colors.cpp"
 
-#define VERSION "2.9.3"
+#define VERSION "2.9.10"
 #define BUILD_DATE __DATE__
 #define BUILD_TIME __TIME__
 
@@ -13,7 +13,7 @@ std::string execHelperVersion(const char* cmd) {
         return "ERROR";
     }
     while (!feof(pipe)) {
-        if (fgets(buffer, 256, pipe) != NULL)
+        if (fgets(buffer, 256, pipe) != nullptr)
             result += buffer;
     }
     pclose(pipe);
@@ -43,7 +43,7 @@ std::string getKernelVersion() {
     char buffer[256];
     std::string result = "";
     while (!feof(pipe)) {
-        if (fgets(buffer, 256, pipe) != NULL)
+        if (fgets(buffer, 256, pipe) != nullptr)
             result += buffer;
     }
     

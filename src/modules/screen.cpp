@@ -11,7 +11,7 @@ std::string getScreenResInfo() {
 
     if (sessionType && std::string(sessionType) == "wayland") {
         
-        Display *display = XOpenDisplay(NULL);
+        Display *display = XOpenDisplay(nullptr);
         int screen = DefaultScreen(display);
         int screenWidth = DisplayWidth(display, screen);
         int screenHeight = DisplayHeight(display, screen);
@@ -22,7 +22,7 @@ std::string getScreenResInfo() {
             if (output_info->connection == RR_Connected) {
                 XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(display, res, output_info->crtc);
                 if (crtc_info->mode != None) {
-                    XRRModeInfo *mode_info = NULL;
+                    XRRModeInfo *mode_info = nullptr;
                     for (int j = 0; j < res->nmode; ++j) {
                         if (res->modes[j].id == crtc_info->mode) {
                             mode_info = &res->modes[j];
@@ -51,7 +51,7 @@ std::string getScreenResInfo() {
     }
 
     if (sessionType && std::string(sessionType) == "x11") {
-        Display *display = XOpenDisplay(NULL);
+        Display *display = XOpenDisplay(nullptr);
         int screen = DefaultScreen(display);
         int screenWidth = DisplayWidth(display, screen);
         int screenHeight = DisplayHeight(display, screen);
@@ -62,7 +62,7 @@ std::string getScreenResInfo() {
             if (output_info->connection == RR_Connected) {
                 XRRCrtcInfo *crtc_info = XRRGetCrtcInfo(display, res, output_info->crtc);
                 if (crtc_info->mode != None) {
-                    XRRModeInfo *mode_info = NULL;
+                    XRRModeInfo *mode_info = nullptr;
                     for (int j = 0; j < res->nmode; ++j) {
                         if (res->modes[j].id == crtc_info->mode) {
                             mode_info = &res->modes[j];
