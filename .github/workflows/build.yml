@@ -1,4 +1,4 @@
-name: CI
+name: Build Blazefetch
 
 on:
   push:
@@ -10,42 +10,48 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        arch: [x86_64, arm64]  # Define architectures
+        arch: [amd64, arm64]
         compiler: [gcc, clang]
 
     steps:
-    - name: Checkout source code
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up dependencies
+    - name: Set up QEMU for cross-compilation
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake g++ gcc clang libx11-dev libxrandr-dev libasound2-dev libcurl4-openssl-dev
-        # Disable needrestart prompts
-        echo 'NEEDRESTART_MODE=a' | sudo tee /etc/needrestart/needrestart.conf
+        sudo apt-get install -y cmake g++ gcc clang \
+            libx11-dev libxrandr-dev libasound2-dev libcurl4-openssl-dev
 
     - name: Configure CMake
       run: |
-        cmake -B build -S src -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_CXX_FLAGS="-march=${{ matrix.arch }}"
-    
-    - name: Build the project
-      run: cmake --build build --config Release
-
-    - name: Create artifacts directory
-      run: mkdir -p artifacts
-
-    - name: Copy executables
+        mkdir -p build
+        cd build
+        cmake ../src -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}++ -DCMAKE_C_COMPILER=${{ matrix.compiler }} -DCMAKE_SYSTEM_PROCESSOR=${{ matrix.arch }}
+      
+    - name: Build
       run: |
-        cp build/bin/blazefetch artifacts/blazefetch-${{ matrix.arch }}-${{ matrix.compiler }}
-        cp build/bin/blazefetch_iconic artifacts/blazefetch_iconic-${{ matrix.arch }}-${{ matrix.compiler }}
+        cd build
+        make
 
-    - name: Upload artifacts
+    - name: Test executables
+      run: |
+        cd build/bin
+        ./blazefetch --version
+        ./blazefetch_iconic --version
+
+    - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: blazefetch-${{ matrix.arch }}-${{ matrix.compiler }}
-        path: artifacts/
+        path: build/bin/
