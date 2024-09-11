@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        arch: [x86_64, arm64]  # Define architectures
+        compiler: [gcc, clang]
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v3
+
+    - name: Set up dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ gcc clang libx11-dev libxrandr-dev libasound2-dev libcurl4-openssl-dev
+
+    - name: Set up dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install cmake
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} -DCMAKE_CXX_FLAGS="-march=${{ matrix.arch }}"
+    
+    - name: Build the project
+      run: cmake --build build --config Release
+
+    - name: Create artifacts directory
+      run: mkdir -p artifacts
+
+    - name: Copy executables
+      run: |
+        cp build/bin/blazefetch artifacts/blazefetch-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.compiler }}
+        cp build/bin/blazefetch_iconic artifacts/blazefetch_iconic-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.compiler }}
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: blazefetch-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.compiler }}
+        path: artifacts/

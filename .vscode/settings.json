@@ -82,5 +82,5 @@
         "expected": "cpp",
         "text_encoding": "cpp"
     },
-    "cmake.sourceDirectory": "/mnt/extras/IDE/blazefetch/src"
+    "cmake.sourceDirectory": "/mnt/project/Devel/Git/blazefetch/src"
 }
