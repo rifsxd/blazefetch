@@ -37,7 +37,14 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake ../src -DCMAKE_CXX_COMPILER=${{ matrix.compiler }}++ -DCMAKE_C_COMPILER=${{ matrix.compiler }} -DCMAKE_SYSTEM_PROCESSOR=${{ matrix.arch }}
+        if [ "${{ matrix.compiler }}" = "gcc" ]; then
+          export CXX=g++
+          export CC=gcc
+        else
+          export CXX=clang++
+          export CC=clang
+        fi
+        cmake ../src -DCMAKE_SYSTEM_PROCESSOR=${{ matrix.arch }}
       
     - name: Build
       run: |
