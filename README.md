@@ -3,7 +3,7 @@
 	<blockquote align="center">⚡ A lite & blazing fast system info fetch utility.</blockquote>
 	<p><br>
 
-[![GitHub license](https://img.shields.io/github/license/hushenghao/AndroidEasterEggs?logo=apache&label=License&style=flat)](https://github.com/rifsxd/blazefetch/blob/master/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/rifsxd/blazefetch?logo=apache&label=License&style=flat)](https://github.com/rifsxd/blazefetch/blob/master/LICENSE)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/rifsxd/blazefetch/total?logo=github&label=Downloads&style=flat)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/rifsxd/blazefetch?style=flat&label=Code%20Size)
 [![GitHub Beta CI Status](https://img.shields.io/github/actions/workflow/status/rifsxd/blazefetch/build.yml?logo=github&label=Beta%20CI&style=flat)](https://github.com/rifsxd/blazefetch/actions/workflows/build.yml)
