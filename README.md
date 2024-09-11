@@ -1,14 +1,12 @@
-<div align="center">
-	<h1>Blazefetch</h1>
-	<blockquote align="center">⚡ A lite & blazing fast system info fetch utility.</blockquote>
-	<p><br>
-
 [![GitHub license](https://img.shields.io/github/license/rifsxd/blazefetch?logo=apache&label=License&style=flat)](https://github.com/rifsxd/blazefetch/blob/master/LICENSE)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/rifsxd/blazefetch/total?logo=github&label=Downloads&style=flat)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/rifsxd/blazefetch?style=flat&label=Code%20Size)
 [![GitHub Beta CI Status](https://img.shields.io/github/actions/workflow/status/rifsxd/blazefetch/build.yml?logo=github&label=Beta%20CI&style=flat)](https://github.com/rifsxd/blazefetch/actions/workflows/build.yml)
 
-
+<div align="center">
+	<h1>Blazefetch</h1>
+	<blockquote align="center">⚡ A lite & blazing fast system info fetch utility.</blockquote>
+	<p><br>
 		⚡ This is blazefetch a simple and useful tool to get live fetch info through simple flags which will be very helpful for eww widgets and sys bar like polybars, waybars and such, it doesnt need any refresh or anything just keep the -g command in loop, run it at start with --d or daemon and you are good to go, its very minimal and lite which only takes 200-300 kb and 0.03% cpu every 1 sec (also taking suggestions on which other info should it fetch in the future) !!!THIS IS NOT YOUR AVERAGE FETCH SCRIPT!!!
 	</p><br>
 	<p><br> Default</p><br>
