@@ -31,7 +31,7 @@ endif()
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Set build type
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 # Source files
 set(SRC blazefetch.cpp)
@@ -49,6 +49,9 @@ set(LINK_LIBS X11 Xrandr asound curl)
 # Create object library
 add_library(${BIN}_obj OBJECT ${SRC})
 target_include_directories(${BIN}_obj PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
+# Export the Architecture during build process
+add_definitions(-DBUILD_ARCH="${CMAKE_SYSTEM_PROCESSOR}")
 
 # Common properties
 function(set_common_properties TARGET)

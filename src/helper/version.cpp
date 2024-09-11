@@ -1,9 +1,14 @@
 #include "defines.cpp"
 #include "colors.cpp"
 
-#define VERSION "2.9.14"
+#define VERSION "2.9.15"
 #define BUILD_DATE __DATE__
 #define BUILD_TIME __TIME__
+
+// Macro defined during build process
+#ifndef BUILD_ARCH
+#define BUILD_ARCH "Unknown Architecture"
+#endif
 
 std::string execHelperVersion(const char* cmd) {
     char buffer[256];
@@ -54,22 +59,7 @@ std::string getKernelVersion() {
 }
 
 std::string getArchInfo() {
-    FILE* pipe = popen("uname -m", "r");
-    if (!pipe) {
-        return "Unknown Architecture";
-    }
-
-    char buffer[256];
-    std::string result = "";
-    while (!feof(pipe)) {
-        if (fgets(buffer, 256, pipe) != nullptr)
-            result += buffer;
-    }
-    
-    result.pop_back(); // Remove the newline character
-
-    pclose(pipe);
-    return result;
+    return BUILD_ARCH;
 }
 
 // New function to get compiler information
