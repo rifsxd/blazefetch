@@ -59,7 +59,7 @@ std::string generateAnsiColor(const char* colorValue) {
 std::string getDistroColorAnsiInfo() {
     FILE *fp = fopen("/etc/os-release", "r");
     if (fp) {
-        int foundAnsiColor = 0;
+        // int foundAnsiColor = 0;
         char line[256];
         
         while (fgets(line, sizeof(line), fp)) {
