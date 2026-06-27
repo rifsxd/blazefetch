@@ -50,7 +50,6 @@ jobs:
       run: |
         cd build/bin
         ./blazefetch --version
-        ./blazefetch_iconic --version
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
