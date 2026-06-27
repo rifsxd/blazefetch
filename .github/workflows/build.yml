@@ -1,4 +1,4 @@
-name: Build Blazefetch AMD64
+name: Build Blazefetch ARM64
 
 on:
   push:
@@ -11,7 +11,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Use GitHub's native ARM64 Ubuntu runner
+    runs-on: ubuntu-24.04-arm
 
     strategy:
       matrix:
